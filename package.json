@@ -62,7 +62,7 @@
   },
   "homepage": "https://github.com/pwarnock/liaison-toolkit#readme",
   "dependencies": {
-    "eslint": "^9.39.1"
+    "eslint": "^10.0.0-alpha.1"
   },
   "overrides": {
     "esbuild": "^0.26.0"

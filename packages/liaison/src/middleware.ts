@@ -1,6 +1,20 @@
 import chalk from 'chalk';
 import { PluginMiddleware } from './types.js';
 
+// Define proper interfaces for better type safety
+export interface CommandContext {
+  command: string;
+  args: Record<string, unknown>;
+  options: Record<string, unknown>;
+  metadata: Map<string, unknown>;
+}
+
+export interface CommandResult {
+  success: boolean;
+  dryRun?: boolean;
+  [key: string]: unknown;
+}
+
 /**
  * Middleware Manager for CLI command execution
  * Handles middleware chain execution with priority and error handling
@@ -19,7 +33,7 @@ export class MiddlewareManager {
     this.middlewares.push({
       name: middleware.name,
       priority,
-      middleware
+      middleware,
     });
 
     // Sort by priority (higher priority executes first)
@@ -30,7 +44,7 @@ export class MiddlewareManager {
    * Unregister a middleware by name
    */
   unregister(name: string): boolean {
-    const index = this.middlewares.findIndex(m => m.name === name);
+    const index = this.middlewares.findIndex((m) => m.name === name);
     if (index >= 0) {
       this.middlewares.splice(index, 1);
       return true;
@@ -42,9 +56,9 @@ export class MiddlewareManager {
    * List all registered middlewares
    */
   list(): Array<{ name: string; priority: number }> {
-    return this.middlewares.map(m => ({
+    return this.middlewares.map((m) => ({
       name: m.name,
-      priority: m.priority
+      priority: m.priority,
     }));
   }
 
@@ -52,20 +66,21 @@ export class MiddlewareManager {
    * Execute the middleware chain
    */
   async execute(
-    context: any,
-    finalHandler: () => Promise<any>
-  ): Promise<any> {
+    context: CommandContext,
+    finalHandler: () => Promise<CommandResult>
+  ): Promise<CommandResult> {
     let index = 0;
 
-    const executeNext = async (): Promise<any> => {
+    const executeNext = async (): Promise<CommandResult> => {
       if (index >= this.middlewares.length) {
         return finalHandler();
       }
 
       const { middleware } = this.middlewares[index++];
 
-      return new Promise<any>((resolve, reject) => {
-        middleware.execute(context, () => executeNext())
+      return new Promise<CommandResult>((resolve, reject) => {
+        middleware
+          .execute(context, () => executeNext())
           .then(resolve)
           .catch(reject);
       });
@@ -84,7 +99,10 @@ export class MiddlewareManager {
  */
 export const loggingMiddleware: PluginMiddleware = {
   name: 'logging-middleware',
-  execute: async (context: any, next: () => Promise<any>) => {
+  execute: async (
+    context: CommandContext,
+    next: () => Promise<CommandResult>
+  ) => {
     const command = context.command;
     console.log(chalk.blue(`\n📝 Executing command: ${command}`));
 
@@ -100,7 +118,7 @@ export const loggingMiddleware: PluginMiddleware = {
 
     console.log(chalk.green(`✅ Command completed: ${command}`));
     return result;
-  }
+  },
 };
 
 /**
@@ -108,7 +126,10 @@ export const loggingMiddleware: PluginMiddleware = {
  */
 export const errorHandlingMiddleware: PluginMiddleware = {
   name: 'error-handling-middleware',
-  execute: async (context: any, next: () => Promise<any>) => {
+  execute: async (
+    context: CommandContext,
+    next: () => Promise<CommandResult>
+  ) => {
     try {
       return await next();
     } catch (error) {
@@ -116,10 +137,12 @@ export const errorHandlingMiddleware: PluginMiddleware = {
       context.metadata.set('error', {
         message: err.message,
         command: context.command,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
-      console.error(chalk.red(`❌ Error in command '${context.command}': ${err.message}`));
+      console.error(
+        chalk.red(`❌ Error in command '${context.command}': ${err.message}`)
+      );
 
       if (process.env.DEBUG) {
         console.error(chalk.gray(err.stack || ''));
@@ -127,7 +150,7 @@ export const errorHandlingMiddleware: PluginMiddleware = {
 
       throw error;
     }
-  }
+  },
 };
 
 /**
@@ -135,7 +158,10 @@ export const errorHandlingMiddleware: PluginMiddleware = {
  */
 export const timingMiddleware: PluginMiddleware = {
   name: 'timing-middleware',
-  execute: async (context: any, next: () => Promise<any>) => {
+  execute: async (
+    context: CommandContext,
+    next: () => Promise<CommandResult>
+  ) => {
     const start = process.hrtime.bigint();
 
     try {
@@ -150,7 +176,7 @@ export const timingMiddleware: PluginMiddleware = {
         console.log(chalk.dim(`⏱️  Execution time: ${duration.toFixed(2)}ms`));
       }
     }
-  }
+  },
 };
 
 /**
@@ -158,7 +184,10 @@ export const timingMiddleware: PluginMiddleware = {
  */
 export const configMiddleware: PluginMiddleware = {
   name: 'config-middleware',
-  execute: async (context: any, next: () => Promise<any>) => {
+  execute: async (
+    context: CommandContext,
+    next: () => Promise<CommandResult>
+  ) => {
     // Load configuration if needed
     const configPath = process.cwd() + '/.opencode-cli-config.json';
 
@@ -173,7 +202,7 @@ export const configMiddleware: PluginMiddleware = {
     }
 
     return await next();
-  }
+  },
 };
 
 /**
@@ -181,9 +210,13 @@ export const configMiddleware: PluginMiddleware = {
  */
 export const validationMiddleware: PluginMiddleware = {
   name: 'validation-middleware',
-  execute: async (context: any, next: () => Promise<any>) => {
+  execute: async (
+    context: CommandContext,
+    next: () => Promise<CommandResult>
+  ) => {
     // Validate required arguments
-    const requiredFields = context.metadata.get('requiredFields') || [];
+    const requiredFields =
+      (context.metadata.get('requiredFields') as string[] | undefined) ?? [];
 
     for (const field of requiredFields) {
       if (!context.args[field]) {
@@ -192,7 +225,7 @@ export const validationMiddleware: PluginMiddleware = {
     }
 
     return await next();
-  }
+  },
 };
 
 /**
@@ -200,11 +233,17 @@ export const validationMiddleware: PluginMiddleware = {
  */
 export const cacheMiddleware: PluginMiddleware = {
   name: 'cache-middleware',
-  execute: async (context: any, next: () => Promise<any>) => {
+  execute: async (
+    context: CommandContext,
+    next: () => Promise<CommandResult>
+  ) => {
     const cacheKey = `${context.command}:${JSON.stringify(context.args)}`;
 
     // Check cache
-    const cacheStore = context.metadata.get('cacheStore') || new Map();
+    type CacheStore = Map<string, CommandResult>;
+    const cacheStore =
+      (context.metadata.get('cacheStore') as CacheStore | undefined) ??
+      new Map<string, CommandResult>();
     const cachedResult = cacheStore.get(cacheKey);
 
     if (cachedResult && !context.options.nocache) {
@@ -222,7 +261,7 @@ export const cacheMiddleware: PluginMiddleware = {
       context.metadata.set('cacheStore', cacheStore);
     }
     return result;
-  }
+  },
 };
 
 /**
@@ -230,7 +269,10 @@ export const cacheMiddleware: PluginMiddleware = {
  */
 export const authMiddleware: PluginMiddleware = {
   name: 'auth-middleware',
-  execute: async (context: any, next: () => Promise<any>) => {
+  execute: async (
+    context: CommandContext,
+    next: () => Promise<CommandResult>
+  ) => {
     // Check for auth token
     const token = process.env.OPENCODE_TOKEN || context.options.token;
 
@@ -242,7 +284,7 @@ export const authMiddleware: PluginMiddleware = {
 
     context.metadata.set('token', token);
     return await next();
-  }
+  },
 };
 
 /**
@@ -250,9 +292,14 @@ export const authMiddleware: PluginMiddleware = {
  */
 export const dryRunMiddleware: PluginMiddleware = {
   name: 'dry-run-middleware',
-  execute: async (context: any, next: () => Promise<any>) => {
+  execute: async (
+    context: CommandContext,
+    next: () => Promise<CommandResult>
+  ) => {
     if (context.options.dryRun) {
-      console.log(chalk.yellow('🧪 DRY RUN MODE - No actual changes will be made'));
+      console.log(
+        chalk.yellow('🧪 DRY RUN MODE - No actual changes will be made')
+      );
       console.log(chalk.yellow(`Command: ${context.command}`));
       console.log(chalk.yellow(`Args: ${JSON.stringify(context.args)}`));
       console.log(chalk.yellow(`Options: ${JSON.stringify(context.options)}`));
@@ -261,5 +308,5 @@ export const dryRunMiddleware: PluginMiddleware = {
     }
 
     return await next();
-  }
+  },
 };
