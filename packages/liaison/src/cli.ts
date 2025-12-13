@@ -5,6 +5,8 @@ import chalk from 'chalk';
 import { UnifiedPluginManager } from './plugin-manager.js';
 import type { CLIPlugin } from './types.js';
 import { createHealthCommand } from './commands/health.js';
+import { createReconcileCommand } from './commands/reconcile.js';
+import { createTaskCommand } from './commands/task.js';
 
 const program = new Command();
 const pluginManager = new UnifiedPluginManager();
@@ -195,6 +197,12 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Health check command
 program.addCommand(createHealthCommand());
+
+// Reconcile command
+program.addCommand(createReconcileCommand());
+
+// Task command
+program.addCommand(createTaskCommand());
 
 // Load built-in plugins
 async function loadBuiltInPlugins() {

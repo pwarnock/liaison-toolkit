@@ -8,7 +8,8 @@ This document outlines all the tasks to work on to deliver this particular versi
 | 🟢 | Completed |
 
 ## **Progress Summary**
-**Overall Progress**: 8/24 tasks complete (33%)
+**Overall Progress**: 8/32 tasks complete (25%)
+**E2E Testing Tasks**: owk-dtu, owk-k57, owk-g9q, owk-6vc, owk-bak, owk-9az, owk-5xf (7 atomic tasks created in Beads)
 
 ## **Phase 1: Foundation and Architecture**
 
@@ -32,7 +33,14 @@ This document outlines all the tasks to work on to deliver this particular versi
 
 | ID  | Task             | Description                             | Dependencies | Status | Assigned To |
 |-----|------------------|-----------------------------------------|-------------|----------|--------|
-| owk-v5o-09 | Set up multi-layered testing framework | Implement unit, integration, E2E, BDD, security, accessibility, and architecture testing | owk-v5o-07 | 🔴 | AGENT |
+| owk-v5o-09 | Set up multi-layered testing framework | Implement unit, integration, E2E, BDD, security, accessibility, and architecture testing | owk-v5o-07 | 🟡 | AGENT |
+| owk-dtu | Environment verification E2E tests | Verify .cody/project/versions exists, bd CLI available, Beads backend healthy | owk-v5o-09 | 🔴 | AGENT |
+| owk-k57 | Tasklist parsing E2E tests | Parse v0.5.0/tasklist.md, extract rows, identify IDs | owk-v5o-09 | 🔴 | AGENT |
+| owk-g9q | Dry-run analysis E2E tests | Verify --dry-run produces output without writing files | owk-v5o-09 | 🔴 | AGENT |
+| owk-6vc | Reconciliation mutation E2E tests | Validate ID creation, status updates, deletion detection | owk-v5o-09 | 🔴 | AGENT |
+| owk-bak | Multi-version discovery E2E tests | Discover all versions in .cody/project/versions | owk-v5o-09 | 🔴 | AGENT |
+| owk-9az | File integrity E2E tests | Verify markdown structure and column consistency | owk-v5o-09 | 🔴 | AGENT |
+| owk-5xf | Error handling E2E tests | Test graceful handling of missing/malformed tasklists | owk-v5o-09 | 🔴 | AGENT |
 | owk-v5o-10 | Implement cross-platform testing | Ensure compatibility across macOS, Linux, and Windows with CI/CD integration | owk-v5o-09 | 🔴 | AGENT |
 | owk-v5o-11 | Add performance benchmarking | Implement performance testing with optimization and regression detection | owk-v5o-09 | 🔴 | AGENT |
 | owk-v5o-12 | Create test reporting and coverage analysis | Set up comprehensive test reporting with coverage analysis and quality gates | owk-v5o-09 | 🔴 | AGENT |

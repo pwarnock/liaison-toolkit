@@ -7,6 +7,17 @@ import { join } from 'path';
 
 /**
  * Real BeadsClient implementation using @beads/bd npm package
+ *
+ * @deprecated Use `@pwarnock/liaison` BeadsAdapter instead for CLI tasks.
+ * BeadsClientImpl is maintained for backward compatibility with the sync command
+ * but should not be used for new CLI features. The lighter-weight BeadsAdapter
+ * in packages/liaison/src/reconciler/adapters/beads-adapter.ts is preferred
+ * for single-responsibility task operations.
+ *
+ * Migration path:
+ * - Replace `BeadsClientImpl` usage with `BeadsAdapter` from @pwarnock/liaison
+ * - Update imports: `import { BeadsAdapter } from '@pwarnock/liaison/reconciler'`
+ * - Call adapter methods: `adapter.getTask()`, `adapter.createTask()`, etc.
  */
 export class BeadsClientImpl implements BeadsClient {
   public projectPath: string;

@@ -21,6 +21,26 @@ git add . && git commit -m "Add new task"
 # Sync runs automatically before/after commit
 ```
 
+### Manual Task Management (Simpler Alternative)
+For simple task operations without full sync workflow, use the unified Liaison CLI:
+
+```bash
+# Create task
+liaison task create "New feature" --description "Implement X"
+
+# List tasks
+liaison task list
+liaison task list --status closed
+
+# Get task details
+liaison task get task-123
+
+# Update task status
+liaison task update task-123 --status closed
+```
+
+The `liaison task` command provides a lightweight interface using the same BeadsAdapter as the reconciler, with no automatic syncing (you control when to reconcile separately with `liaison reconcile`).
+
 ### Manual Sync (If Needed)
 ```bash
 # Force sync anytime
