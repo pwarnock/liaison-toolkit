@@ -1,0 +1,185 @@
+---
+title: Liaison Toolkit - API Sequence Diagrams
+description: API flow sequences and request-response patterns across the system
+---
+
+sequenceDiagram
+    participant User
+    participant CLI as Main CLI
+    participant Command as Command Handler
+    participant Config as Config System
+    participant PluginMgr as Plugin Manager
+    participant Reconciler as Reconciler Engine
+    participant BeadsAPI as Beads API
+    participant GitHubAPI as GitHub API
+    participant Cache as Cache System
+    participant Validator as Validator
+
+    Note over User,Validator: CLI Command Execution Flow
+
+    User->>CLI: Execute "liaison sync"
+    CLI->>Config: Load configuration
+    Config->>Cache: Check cache for config
+    Cache-->>Config: Return cached config (if exists)
+    Config->>Validator: Validate configuration schema
+    Validator-->>Config: Validation result
+
+    alt Configuration Valid
+        Config-->>CLI: Valid configuration
+        CLI->>Command: Execute sync command
+        Command->>Reconciler: Start reconciliation process
+        Reconciler->>PluginMgr: Initialize plugins
+        PluginMgr-->>Reconciler: Plugins ready
+
+        par GitHub API Flow
+            Reconciler->>GitHubAPI: Fetch GitHub issues
+            GitHubAPI-->>Reconciler: Return issues data
+        and Beads API Flow
+            Reconciler->>BeadsAPI: Fetch Beads tasks
+            BeadsAPI-->>Reconciler: Return tasks data
+        end
+
+        Reconciler->>Reconciler: Process and reconcile differences
+        Reconciler->>Cache: Cache reconciliation results
+        Reconciler-->>Command: Sync results
+        Command-->>CLI: Success response
+        CLI-->>User: Sync completed successfully
+    else Configuration Invalid
+        Config-->>CLI: Validation errors
+        CLI-->>User: Configuration error message
+    end
+
+sequenceDiagram
+    participant User
+    participant CLI as Liaison CLI
+    participant Plugin as Plugin Manager
+    participant Cache as Cache Interface
+    participant Validator as Validator
+    participant Security as Security Manager
+
+    Note over User,Security: Plugin Execution Flow
+
+    User->>CLI: Execute plugin command
+    CLI->>Plugin: Register plugin
+    Plugin->>Validator: Validate plugin configuration
+    Validator-->>Plugin: Validation result
+
+    Plugin->>Security: Create security context
+    Security-->>Plugin: Security context
+
+    alt Plugin Validation Passed
+        Plugin->>Cache: Initialize plugin cache
+        Cache-->>Plugin: Cache initialized
+
+        Plugin->>Plugin: Execute plugin logic
+        Plugin->>Cache: Store plugin results
+        Cache-->>Plugin: Results cached
+
+        Plugin-->>CLI: Plugin execution result
+        CLI-->>User: Plugin completed
+    else Plugin Validation Failed
+        Plugin-->>CLI: Validation error
+        CLI-->>User: Plugin execution failed
+    end
+
+sequenceDiagram
+    participant Reconciler
+    participant Parser as Tasklist Parser
+    participant BeadsAPI as Beads API
+    participant GitHubAPI as GitHub API
+    participant Cache as Cache System
+    participant Events as Event System
+
+    Note over Reconciler,Events: Task Reconciliation Flow
+
+    Reconciler->>Parser: Parse tasklist file
+    Parser-->>Reconciler: Parsed task data
+
+    Reconciler->>Cache: Get cached task state
+    Cache-->>Reconciler: Cached state
+
+    par Fetch GitHub Issues
+        Reconciler->>GitHubAPI: Fetch issues for version
+        GitHubAPI-->>Reconciler: GitHub issues data
+    and Fetch Beads Tasks
+        Reconciler->>BeadsAPI: Fetch tasks for version
+        BeadsAPI-->>Reconciler: Beads tasks data
+    end
+
+    Reconciler->>Reconciler: Compare and identify changes
+
+    alt Changes Detected
+        Reconciler->>Events: Emit reconciliation events
+        Events-->>Reconciler: Events processed
+
+        Reconciler->>BeadsAPI: Create/update tasks in Beads
+        BeadsAPI-->>Reconciler: Task creation result
+
+        Reconciler->>GitHubAPI: Update GitHub issues
+        GitHubAPI-->>Reconciler: Issue update result
+
+        Reconciler->>Cache: Update cached state
+        Cache-->>Reconciler: State updated
+
+        Reconciler->>Events: Emit completion events
+    else No Changes
+        Reconciler->>Cache: Update last sync timestamp
+        Cache-->>Reconciler: Timestamp updated
+    end
+
+sequenceDiagram
+    participant User
+    participant CLI as Main CLI
+    participant Config as Config Loader
+    participant Validator as Zod Validator
+    participant Cache as Cache Manager
+    participant Store as JSON Store
+
+    Note over User,Store: Configuration Loading Flow
+
+    User->>CLI: Run any command
+    CLI->>Config: Load configuration
+    Config->>Store: Read config files
+    Store-->>Config: Raw configuration data
+
+    Config->>Validator: Validate against schemas
+    Validator-->>Config: Validation result
+
+    alt Configuration Valid
+        Config->>Cache: Cache validated config
+        Cache-->>Config: Config cached
+
+        Config-->>CLI: Valid configuration object
+        CLI->>CLI: Execute requested command
+    else Configuration Invalid
+        Config-->>CLI: Validation errors
+        CLI-->>User: Configuration error with details
+    end
+
+sequenceDiagram
+    participant Events as Event Bus
+    participant Reconciler as Reconciler Engine
+    participant BeadsAPI as Beads API
+    participant GitHubAPI as GitHub API
+    participant Cache as Cache
+    participant Plugins as Plugin System
+
+    Note over Events,Plugins: Event-Driven Communication
+
+    Events->>Reconciler: 'sync_started' event
+    Reconciler-->>Events: Acknowledge event
+
+    Events->>BeadsAPI: 'data_fetch_needed' event
+    BeadsAPI-->>Events: 'data_fetched' event
+
+    Events->>GitHubAPI: 'data_fetch_needed' event
+    GitHubAPI-->>Events: 'data_fetched' event
+
+    Events->>Cache: 'cache_invalidate' event
+    Cache-->>Events: 'cache_invalidated' event
+
+    Events->>Plugins: 'reconciliation_complete' event
+    Plugins-->>Events: 'plugins_notified' event
+
+    Events->>Reconciler: 'sync_completed' event
+    Reconciler-->>Events: Sync finalization complete

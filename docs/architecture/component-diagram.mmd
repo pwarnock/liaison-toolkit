@@ -1,0 +1,170 @@
+---
+title: Liaison Toolkit - Component Architecture Diagram
+description: Module relationships and dependencies across the liaison-toolkit system
+---
+
+graph TB
+    %% Core Foundation Layer
+    subgraph "CORE FOUNDATION"
+        CACHE[Cache Interface]
+        VALIDATOR[Validator Interface]
+        SECURITY[Security Manager]
+        TYPES[Type System]
+        PLUGIN_MGR[Plugin Manager]
+    end
+
+    %% Configuration System
+    subgraph "CONFIGURATION LAYER"
+        CONFIG_SYS[Unified Config System]
+        ZOD_SCHEMA[Zod Schema Validation]
+        ENV_MGR[Environment Manager]
+    end
+
+    %% Liaison Package Layer
+    subgraph "LIAISON PACKAGE"
+        CLI_LIAISON[Liaison CLI]
+        CMD_HANDLERS[Command Handlers]
+        MIDDLEWARE[Middleware System]
+        PLUGIN_MGR_LIAISON[Liaison Plugin Manager]
+        RECONCILER[Reconciler Engine]
+        TASK_ADAPTER[Task Backend Adapter]
+        TASKLIST_PARSER[Tasklist Parser]
+    end
+
+    %% Liaison Coordinator Package Layer
+    subgraph "LIAISON COORDINATOR"
+        MAIN_CLI[Main CLI Entry Point]
+        SYNC_CMD[Sync Command]
+        CONFIG_CMD[Config Command]
+        TEMPLATE_CMD[Template Command]
+        INIT_CMD[Init Command]
+        VERSION_CMD[Version Command]
+        BEADS_VIEWER[Beads Viewer]
+        PLUGIN_CMD[Plugin Command]
+        TASK_CMD[Task Command]
+        WORKFLOW_CMD[Workflow Command]
+        MIGRATE_CMD[Migrate Command]
+    end
+
+    %% External Integrations
+    subgraph "EXTERNAL INTEGRATIONS"
+        GITHUB_API[GitHub API]
+        BEADS_API[Beads API]
+        CODY_FW[Cody Framework]
+        OPENCODE_CFG[OpenCode Config]
+    end
+
+    %% Agent System
+    subgraph "AGENT SYSTEM"
+        CODY_ADMIN[Cody Admin Agent]
+        CODY_BUILDER[Cody Builder Agent]
+        CODY_PLANNER[Cody Planner Agent]
+        GIT_AUTO[Git Automation Agent]
+        LIBRARY_RESEARCHER[Library Researcher Agent]
+        SECURITY_AGENT[Security Agent]
+        QA_AGENT[QA Agent]
+        TECHNICAL_WRITER[Technical Writer Agent]
+    end
+
+    %% Python Configuration System
+    subgraph "PYTHON CONFIG"
+        PYTHON_CLI[Python CLI Tool]
+        VALIDATOR_PY[Python Validator]
+        COMPATIBILITY[Compatibility Layer]
+        ENV_TEMPLATES[Environment Templates]
+    end
+
+    %% Data Persistence
+    subgraph "DATA PERSISTENCE"
+        JSON_STORE[JSON File Storage]
+        CACHE_STORE[Cache Storage]
+        CONFIG_STORE[Config Storage]
+        TASK_STORE[Task Storage]
+    end
+
+    %% Core Dependencies
+    CACHE --> JSON_STORE
+    VALIDATOR --> ZOD_SCHEMA
+    SECURITY --> JSON_STORE
+    TYPES --> CONFIG_SYS
+    PLUGIN_MGR --> JSON_STORE
+
+    %% Configuration Flow
+    CONFIG_SYS --> ZOD_SCHEMA
+    CONFIG_SYS --> ENV_MGR
+    ENV_MGR --> JSON_STORE
+
+    %% Liaison Package Dependencies
+    CLI_LIAISON --> CMD_HANDLERS
+    CLI_LIAISON --> MIDDLEWARE
+    CLI_LIAISON --> PLUGIN_MGR_LIAISON
+    CMD_HANDLERS --> RECONCILER
+    MIDDLEWARE --> PLUGIN_MGR_LIAISON
+    PLUGIN_MGR_LIAISON --> PLUGIN_MGR
+    RECONCILER --> TASK_ADAPTER
+    RECONCILER --> TASKLIST_PARSER
+    TASK_ADAPTER --> TYPES
+
+    %% Liaison Coordinator Dependencies
+    MAIN_CLI --> SYNC_CMD
+    MAIN_CLI --> CONFIG_CMD
+    MAIN_CLI --> TEMPLATE_CMD
+    MAIN_CLI --> INIT_CMD
+    MAIN_CLI --> VERSION_CMD
+    MAIN_CLI --> BEADS_VIEWER
+    MAIN_CLI --> PLUGIN_CMD
+    MAIN_CLI --> TASK_CMD
+    MAIN_CLI --> WORKFLOW_CMD
+    MAIN_CLI --> MIGRATE_CMD
+
+    MAIN_CLI --> CLI_LIAISON
+    SYNC_CMD --> RECONCILER
+    CONFIG_CMD --> CONFIG_SYS
+    TASK_CMD --> RECONCILER
+    WORKFLOW_CMD --> RECONCILER
+
+    %% External Integration Flows
+    TASK_ADAPTER --> GITHUB_API
+    TASK_ADAPTER --> BEADS_API
+    RECONCILER --> CODY_FW
+    CONFIG_SYS --> OPENCODE_CFG
+
+    %% Agent System Integration
+    PLUGIN_CMD --> CODY_ADMIN
+    PLUGIN_CMD --> CODY_BUILDER
+    PLUGIN_CMD --> CODY_PLANNER
+    SYNC_CMD --> GIT_AUTO
+    WORKFLOW_CMD --> LIBRARY_RESEARCHER
+    TASK_CMD --> SECURITY_AGENT
+    TASK_CMD --> QA_AGENT
+    CONFIG_CMD --> TECHNICAL_WRITER
+
+    %% Python Integration
+    OPENCODE_CFG --> PYTHON_CLI
+    PYTHON_CLI --> VALIDATOR_PY
+    PYTHON_CLI --> COMPATIBILITY
+    PYTHON_CLI --> ENV_TEMPLATES
+
+    %% Data Flow
+    JSON_STORE --> CONFIG_STORE
+    CACHE --> CACHE_STORE
+    RECONCILER --> TASK_STORE
+
+    %% Styling
+    classDef coreLayer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef configLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef liaisonLayer fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef coordinatorLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef externalLayer fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef agentLayer fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    classDef pythonLayer fill:#e3f2fd,stroke:#0d47a1,stroke-width:2px
+    classDef dataLayer fill:#fafafa,stroke:#424242,stroke-width:2px
+
+    class CACHE,VALIDATOR,SECURITY,TYPES,PLUGIN_MGR coreLayer
+    class CONFIG_SYS,ZOD_SCHEMA,ENV_MGR configLayer
+    class CLI_LIAISON,CMD_HANDLERS,MIDDLEWARE,PLUGIN_MGR_LIAISON,RECONCILER,TASK_ADAPTER,TASKLIST_PARSER liaisonLayer
+    class MAIN_CLI,SYNC_CMD,CONFIG_CMD,TEMPLATE_CMD,INIT_CMD,VERSION_CMD,BEADS_VIEWER,PLUGIN_CMD,TASK_CMD,WORKFLOW_CMD,MIGRATE_CMD coordinatorLayer
+    class GITHUB_API,BEADS_API,CODY_FW,OPENCODE_CFG externalLayer
+    class CODY_ADMIN,CODY_BUILDER,CODY_PLANNER,GIT_AUTO,LIBRARY_RESEARCHER,SECURITY_AGENT,QA_AGENT,TECHNICAL_WRITER agentLayer
+    class PYTHON_CLI,VALIDATOR_PY,COMPATIBILITY,ENV_TEMPLATES pythonLayer
+    class JSON_STORE,CACHE_STORE,CONFIG_STORE,TASK_STORE dataLayer

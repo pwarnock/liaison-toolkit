@@ -1,0 +1,181 @@
+---
+title: Liaison Toolkit - System Architecture Overview
+description: High-level system design showing major components and their interactions
+---
+
+graph TB
+    %% External Systems Layer
+    subgraph "EXTERNAL SYSTEMS"
+        GITHUB[GitHub Repository]
+        BEADS[Task Management System]
+        CODY[Cody Product Builder Toolkit]
+        FILES[File System & Configuration Files]
+    end
+
+    %% User Interface Layer
+    subgraph "USER INTERFACE LAYER"
+        CLI_MAIN[Main CLI Interface<br/>cody-beads]
+        CLI_LIAISON[Liaison CLI<br/>liaison commands]
+        WEB_UI[Web Dashboard<br/>Development planned]
+        SHELL_SCRIPTS[Shell Scripts & Automation]
+    end
+
+    %% Command Processing Layer
+    subgraph "COMMAND PROCESSING LAYER"
+        CMD_HANDLER[Command Handlers]
+        MIDDLEWARE[Middleware System]
+        PLUGIN_SYSTEM[Plugin System]
+        COMMAND_ROUTER[Command Router]
+    end
+
+    %% Core Business Logic Layer
+    subgraph "CORE BUSINESS LOGIC LAYER"
+        RECONCILER_ENGINE[Reconciler Engine<br/>Task Synchronization]
+        SYNC_ENGINE[Sync Engine<br/>Data Synchronization]
+        CONFLICT_RESOLVER[Conflict Resolution<br/>Data Conflict Handling]
+        EVENT_BUS[Event Bus<br/>Inter-component Communication]
+        VALIDATION_ENGINE[Validation Engine<br/>Schema & Data Validation]
+    end
+
+    %% Integration Layer
+    subgraph "INTEGRATION LAYER"
+        GITHUB_ADAPTER[GitHub API Adapter]
+        BEADS_ADAPTER[Beads API Adapter]
+        CODY_ADAPTER[Cody Framework Adapter]
+        FILE_ADAPTER[File System Adapter]
+        JSON_ADAPTER[JSON Configuration Adapter]
+    end
+
+    %% Configuration & Security Layer
+    subgraph "CONFIGURATION & SECURITY LAYER"
+        UNIFIED_CONFIG[Unified Configuration System]
+        SECURITY_MANAGER[Security Manager]
+        PLUGIN_MANAGER[Plugin Manager]
+        CACHE_SYSTEM[Cache System]
+        ENV_MANAGER[Environment Manager]
+    end
+
+    %% Data Persistence Layer
+    subgraph "DATA PERSISTENCE LAYER"
+        JSON_STORE[JSON File Storage]
+        CACHE_STORE[Cache Storage]
+        CONFIG_STORE[Configuration Storage]
+        TASK_STORE[Task Data Storage]
+        EVENT_STORE[Event Store]
+        METADATA_STORE[Metadata Storage]
+    end
+
+    %% Agent System Layer
+    subgraph "AGENT SYSTEM LAYER"
+        CODY_ADMIN_AGENT[Cody Admin Agent]
+        CODY_BUILDER_AGENT[Cody Builder Agent]
+        CODY_PLANNER_AGENT[Cody Planner Agent]
+        GIT_AUTOMATION_AGENT[Git Automation Agent]
+        LIBRARY_RESEARCHER_AGENT[Library Researcher Agent]
+        QA_AGENT[QA Agent]
+        SECURITY_AGENT[Security Agent]
+        TECHNICAL_WRITER_AGENT[Technical Writer Agent]
+    end
+
+    %% Monitoring & Observability Layer
+    subgraph "MONITORING & OBSERVABILITY LAYER"
+        LOGGING_SYSTEM[Logging System]
+        METRICS_SYSTEM[Metrics Collection]
+        HEALTH_CHECK[Health Check System]
+        PERFORMANCE_MONITOR[Performance Monitoring]
+        ERROR_TRACKING[Error Tracking]
+    end
+
+    %% External System Connections
+    GITHUB <--> GITHUB_ADAPTER
+    BEADS <--> BEADS_ADAPTER
+    CODY <--> CODY_ADAPTER
+    FILES <--> FILE_ADAPTER
+    FILES <--> JSON_ADAPTER
+
+    %% User Interface to Command Processing
+    CLI_MAIN --> COMMAND_ROUTER
+    CLI_LIAISON --> COMMAND_ROUTER
+    WEB_UI --> COMMAND_ROUTER
+    SHELL_SCRIPTS --> COMMAND_ROUTER
+
+    COMMAND_ROUTER --> CMD_HANDLER
+    CMD_HANDLER --> MIDDLEWARE
+    MIDDLEWARE --> PLUGIN_SYSTEM
+
+    %% Command Processing to Business Logic
+    CMD_HANDLER --> RECONCILER_ENGINE
+    MIDDLEWARE --> SYNC_ENGINE
+    PLUGIN_SYSTEM --> CONFLICT_RESOLVER
+    RECONCILER_ENGINE --> EVENT_BUS
+    SYNC_ENGINE --> VALIDATION_ENGINE
+
+    %% Business Logic to Integration
+    RECONCILER_ENGINE --> GITHUB_ADAPTER
+    RECONCILER_ENGINE --> BEADS_ADAPTER
+    SYNC_ENGINE --> CODY_ADAPTER
+    CONFLICT_RESOLVER --> FILE_ADAPTER
+    VALIDATION_ENGINE --> JSON_ADAPTER
+
+    %% Integration to External Systems
+    GITHUB_ADAPTER --> GITHUB
+    BEADS_ADAPTER --> BEADS
+    CODY_ADAPTER --> CODY
+    FILE_ADAPTER --> FILES
+    JSON_ADAPTER --> FILES
+
+    %% Configuration & Security Flows
+    UNIFIED_CONFIG --> SECURITY_MANAGER
+    SECURITY_MANAGER --> PLUGIN_MANAGER
+    PLUGIN_MANAGER --> CACHE_SYSTEM
+    CACHE_SYSTEM --> ENV_MANAGER
+
+    %% Data Persistence Flows
+    UNIFIED_CONFIG --> CONFIG_STORE
+    CACHE_SYSTEM --> CACHE_STORE
+    RECONCILER_ENGINE --> TASK_STORE
+    EVENT_BUS --> EVENT_STORE
+    SYNC_ENGINE --> METADATA_STORE
+
+    %% Agent System Integration
+    PLUGIN_SYSTEM --> CODY_ADMIN_AGENT
+    PLUGIN_SYSTEM --> CODY_BUILDER_AGENT
+    PLUGIN_SYSTEM --> CODY_PLANNER_AGENT
+    SYNC_ENGINE --> GIT_AUTOMATION_AGENT
+    RECONCILER_ENGINE --> LIBRARY_RESEARCHER_AGENT
+    VALIDATION_ENGINE --> QA_AGENT
+    SECURITY_MANAGER --> SECURITY_AGENT
+    UNIFIED_CONFIG --> TECHNICAL_WRITER_AGENT
+
+    %% Monitoring Integration
+    EVENT_BUS --> LOGGING_SYSTEM
+    SYNC_ENGINE --> METRICS_SYSTEM
+    RECONCILER_ENGINE --> HEALTH_CHECK
+    CONFLICT_RESOLVER --> PERFORMANCE_MONITOR
+    VALIDATION_ENGINE --> ERROR_TRACKING
+
+    %% Cross-cutting Concerns
+    LOGGING_SYSTEM -.-> ALL_LAYERS
+    METRICS_SYSTEM -.-> ALL_LAYERS
+    HEALTH_CHECK -.-> ALL_LAYERS
+
+    %% Styling
+    classDef externalLayer fill:#ffebee,stroke:#c62828,stroke-width:3px
+    classDef uiLayer fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef commandLayer fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef businessLayer fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef integrationLayer fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef configLayer fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    classDef dataLayer fill:#fafafa,stroke:#424242,stroke-width:2px
+    classDef agentLayer fill:#fce4ec,stroke:#ad1457,stroke-width:2px
+    classDef monitoringLayer fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
+
+    class GITHUB,BEADS,CODY,FILES externalLayer
+    class CLI_MAIN,CLI_LIAISON,WEB_UI,SHELL_SCRIPTS uiLayer
+    class CMD_HANDLER,MIDDLEWARE,PLUGIN_SYSTEM,COMMAND_ROUTER commandLayer
+    class RECONCILER_ENGINE,SYNC_ENGINE,CONFLICT_RESOLVER,EVENT_BUS,VALIDATION_ENGINE businessLayer
+    class GITHUB_ADAPTER,BEADS_ADAPTER,CODY_ADAPTER,FILE_ADAPTER,JSON_ADAPTER integrationLayer
+    class UNIFIED_CONFIG,SECURITY_MANAGER,PLUGIN_MANAGER,CACHE_SYSTEM,ENV_MANAGER configLayer
+    class JSON_STORE,CACHE_STORE,CONFIG_STORE,TASK_STORE,EVENT_STORE,METADATA_STORE dataLayer
+    class CODY_ADMIN_AGENT,CODY_BUILDER_AGENT,CODY_PLANNER_AGENT,GIT_AUTOMATION_AGENT,LIBRARY_RESEARCHER_AGENT,QA_AGENT,SECURITY_AGENT,TECHNICAL_WRITER_AGENT agentLayer
+    class LOGGING_SYSTEM,METRICS_SYSTEM,HEALTH_CHECK,PERFORMANCE_MONITOR,ERROR_TRACKING monitoringLayer

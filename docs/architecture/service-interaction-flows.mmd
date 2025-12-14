@@ -1,0 +1,198 @@
+---
+title: Liaison Toolkit - Service Interaction Flows
+description: Detailed inter-service communication patterns, protocols, and data exchange flows
+---
+
+graph TB
+    %% Client Layer
+    subgraph "CLIENT LAYER"
+        CLI_CLIENT[CLI Client<br/>Node.js Process]
+        SHELL_CLIENT[Shell Scripts<br/>Unix Processes]
+        WEB_CLIENT[Web Dashboard<br/>HTTP/REST]
+        API_CLIENT[API Clients<br/>HTTP/GraphQL]
+    end
+
+    %% Gateway & Load Balancing
+    subgraph "GATEWAY LAYER"
+        API_GATEWAY[API Gateway<br/>Request Routing]
+        LOAD_BALANCER[Load Balancer<br/>Traffic Distribution]
+        RATE_LIMITER[Rate Limiter<br/>Request Throttling]
+    end
+
+    %% Service Mesh Layer
+    subgraph "SERVICE MESH LAYER"
+        SERVICE_DISCOVERY[Service Discovery<br/>Service Registry]
+        CIRCUIT_BREAKER[Circuit Breaker<br/>Fault Tolerance]
+        RETRY_LOGIC[Retry Logic<br/>Error Handling]
+        TIMEOUT_MANAGER[Timeout Manager<br/>Request Timeouts]
+    end
+
+    %% Core Services
+    subgraph "CORE SERVICES"
+        CLI_SERVICE[CLI Service<br/>Command Processing]
+        RECONCILER_SERVICE[Reconciler Service<br/>Task Synchronization]
+        SYNC_SERVICE[Sync Service<br/>Data Synchronization]
+        CONFIG_SERVICE[Configuration Service<br/>Settings Management]
+        PLUGIN_SERVICE[Plugin Service<br/>Plugin Management]
+        EVENT_SERVICE[Event Service<br/>Event Processing]
+    end
+
+    %% Integration Services
+    subgraph "INTEGRATION SERVICES"
+        GITHUB_SERVICE[GitHub Service<br/>GitHub API Integration]
+        BEADS_SERVICE[Beads Service<br/>Beads API Integration]
+        CODY_SERVICE[Cody Service<br/>Cody Framework Integration]
+        FILE_SERVICE[File Service<br/>File System Operations]
+        VALIDATION_SERVICE[Validation Service<br/>Data Validation]
+        SECURITY_SERVICE[Security Service<br/>Authentication/Authorization]
+    end
+
+    %% Data Services
+    subgraph "DATA SERVICES"
+        CACHE_SERVICE[Cache Service<br/>Redis/Memory Cache]
+        DATABASE_SERVICE[Database Service<br/>SQLite/PostgreSQL]
+        FILE_STORE_SERVICE[File Store Service<br/>Local/File Storage]
+        SEARCH_SERVICE[Search Service<br/>Elasticsearch/Solr]
+        QUEUE_SERVICE[Queue Service<br/>Redis/RabbitMQ]
+    end
+
+    %% External Integrations
+    subgraph "EXTERNAL INTEGRATIONS"
+        GITHUB_API[GitHub REST API<br/>HTTPS/JSON]
+        BEADS_API[Beads API<br/>HTTP/JSON]
+        CODY_FRAMEWORK[Cody Framework<br/>Internal API]
+        NOTIFICATION_SERVICE[Notification Service<br/>Email/Slack/Webhooks]
+        MONITORING_SERVICE[Monitoring Service<br/>Metrics/Logs/Traces]
+    end
+
+    %% Protocol Definitions
+    subgraph "PROTOCOL LAYER"
+        HTTP_PROTOCOL[HTTP/HTTPS<br/>REST API]
+        WEBSOCKET_PROTOCOL[WebSocket<br/>Real-time Updates]
+        GRAPHQL_PROTOCOL[GraphQL<br/>Query Language]
+        JSON_RPC_PROTOCOL[JSON-RPC<br/>Remote Procedure Calls]
+        MESSAGE_QUEUE_PROTOCOL[Message Queue<br/>Async Communication]
+    end
+
+    %% Communication Flows
+
+    %% Client to Gateway
+    CLI_CLIENT -->|HTTP/HTTPS| API_GATEWAY
+    SHELL_CLIENT -->|Process/IPC| API_GATEWAY
+    WEB_CLIENT -->|HTTP/WebSocket| API_GATEWAY
+    API_CLIENT -->|HTTP/GraphQL| API_GATEWAY
+
+    %% Gateway Processing
+    API_GATEWAY --> RATE_LIMITER
+    RATE_LIMITER --> LOAD_BALANCER
+    LOAD_BALANCER --> SERVICE_DISCOVERY
+
+    %% Service Discovery
+    SERVICE_DISCOVERY -->|Service Registry| CLI_SERVICE
+    SERVICE_DISCOVERY -->|Service Registry| RECONCILER_SERVICE
+    SERVICE_DISCOVERY -->|Service Registry| SYNC_SERVICE
+    SERVICE_DISCOVERY -->|Service Registry| CONFIG_SERVICE
+    SERVICE_DISCOVERY -->|Service Registry| PLUGIN_SERVICE
+    SERVICE_DISCOVERY -->|Service Registry| EVENT_SERVICE
+
+    %% Gateway to Services
+    LOAD_BALANCER -->|HTTP/JSON| CLI_SERVICE
+    LOAD_BALANCER -->|HTTP/JSON| RECONCILER_SERVICE
+    LOAD_BALANCER -->|HTTP/JSON| SYNC_SERVICE
+    LOAD_BALANCER -->|HTTP/JSON| CONFIG_SERVICE
+    LOAD_BALANCER -->|HTTP/JSON| PLUGIN_SERVICE
+    LOAD_BALANCER -->|WebSocket| EVENT_SERVICE
+
+    %% Service Communication Patterns
+    CLI_SERVICE -->|HTTP/JSON-RPC| RECONCILER_SERVICE
+    RECONCILER_SERVICE -->|Message Queue| SYNC_SERVICE
+    SYNC_SERVICE -->|HTTP/GraphQL| CONFIG_SERVICE
+    CONFIG_SERVICE -->|WebSocket| PLUGIN_SERVICE
+    PLUGIN_SERVICE -->|HTTP/JSON| EVENT_SERVICE
+
+    %% Circuit Breaker & Fault Tolerance
+    CLI_SERVICE --> CIRCUIT_BREAKER
+    RECONCILER_SERVICE --> CIRCUIT_BREAKER
+    SYNC_SERVICE --> CIRCUIT_BREAKER
+
+    CIRCUIT_BREAKER --> RETRY_LOGIC
+    RETRY_LOGIC --> TIMEOUT_MANAGER
+
+    %% Core to Integration Services
+    RECONCILER_SERVICE -->|HTTP/HTTPS| GITHUB_SERVICE
+    RECONCILER_SERVICE -->|HTTP/HTTPS| BEADS_SERVICE
+    SYNC_SERVICE -->|Internal API| CODY_SERVICE
+    CONFIG_SERVICE -->|File I/O| FILE_SERVICE
+    PLUGIN_SERVICE -->|HTTP/JSON| VALIDATION_SERVICE
+    EVENT_SERVICE -->|HTTP/HTTPS| SECURITY_SERVICE
+
+    %% Integration to External Services
+    GITHUB_SERVICE -->|HTTPS/JSON| GITHUB_API
+    BEADS_SERVICE -->|HTTPS/JSON| BEADS_API
+    CODY_SERVICE -->|Internal API| CODY_FRAMEWORK
+    FILE_SERVICE -->|File System| NOTIFICATION_SERVICE
+    VALIDATION_SERVICE -->|HTTP/JSON| MONITORING_SERVICE
+
+    %% Data Service Communications
+    CLI_SERVICE -->|Redis/HTTP| CACHE_SERVICE
+    RECONCILER_SERVICE -->|SQL| DATABASE_SERVICE
+    SYNC_SERVICE -->|File I/O| FILE_STORE_SERVICE
+    CONFIG_SERVICE -->|Search API| SEARCH_SERVICE
+    EVENT_SERVICE -->|Message Queue| QUEUE_SERVICE
+
+    %% Data Flow Patterns
+    CACHE_SERVICE <--> DATABASE_SERVICE
+    DATABASE_SERVICE <--> FILE_STORE_SERVICE
+    FILE_STORE_SERVICE <--> SEARCH_SERVICE
+    SEARCH_SERVICE <--> QUEUE_SERVICE
+    QUEUE_SERVICE <--> CACHE_SERVICE
+
+    %% Protocol Usage
+    HTTP_PROTOCOL -->|RESTful API| CLI_SERVICE
+    WEBSOCKET_PROTOCOL -->|Real-time| EVENT_SERVICE
+    GRAPHQL_PROTOCOL -->|Flexible Queries| CONFIG_SERVICE
+    JSON_RPC_PROTOCOL -->|Remote Calls| RECONCILER_SERVICE
+    MESSAGE_QUEUE_PROTOCOL -->|Async Tasks| SYNC_SERVICE
+
+    %% Cross-Service Patterns
+    EVENT_SERVICE -.->|Event Streaming| ALL_SERVICES
+    SECURITY_SERVICE -.->|Authentication| ALL_SERVICES
+    MONITORING_SERVICE -.->|Metrics Collection| ALL_SERVICES
+    TIMEOUT_MANAGER -.->|Timeout Control| ALL_SERVICES
+
+    %% Security Flows
+    SECURITY_SERVICE -->|Token Validation| CLI_SERVICE
+    SECURITY_SERVICE -->|Permission Check| RECONCILER_SERVICE
+    SECURITY_SERVICE -->|Access Control| SYNC_SERVICE
+    SECURITY_SERVICE -->|Authorization| CONFIG_SERVICE
+
+    %% Monitoring Flows
+    MONITORING_SERVICE -->|Metrics| CLI_SERVICE
+    MONITORING_SERVICE -->|Logs| RECONCILER_SERVICE
+    MONITORING_SERVICE -->|Traces| SYNC_SERVICE
+    MONITORING_SERVICE -->|Alerts| CONFIG_SERVICE
+
+    %% Notification Flows
+    NOTIFICATION_SERVICE -->|Email| CLI_CLIENT
+    NOTIFICATION_SERVICE -->|Slack| WEB_CLIENT
+    NOTIFICATION_SERVICE -->|Webhook| API_CLIENT
+    NOTIFICATION_SERVICE -->|Desktop| SHELL_CLIENT
+
+    %% Styling
+    classDef clientLayer fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px
+    classDef gatewayLayer fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef meshLayer fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef coreLayer fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef integrationLayer fill:#fce4ec,stroke:#ad1457,stroke-width:2px
+    classDef dataLayer fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    classDef externalLayer fill:#ffebee,stroke:#c62828,stroke-width:2px
+    classDef protocolLayer fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
+
+    class CLI_CLIENT,SHELL_CLIENT,WEB_CLIENT,API_CLIENT clientLayer
+    class API_GATEWAY,LOAD_BALANCER,RATE_LIMITER gatewayLayer
+    class SERVICE_DISCOVERY,CIRCUIT_BREAKER,RETRY_LOGIC,TIMEOUT_MANAGER meshLayer
+    class CLI_SERVICE,RECONCILER_SERVICE,SYNC_SERVICE,CONFIG_SERVICE,PLUGIN_SERVICE,EVENT_SERVICE coreLayer
+    class GITHUB_SERVICE,BEADS_SERVICE,CODY_SERVICE,FILE_SERVICE,VALIDATION_SERVICE,SECURITY_SERVICE integrationLayer
+    class CACHE_SERVICE,DATABASE_SERVICE,FILE_STORE_SERVICE,SEARCH_SERVICE,QUEUE_SERVICE dataLayer
+    class GITHUB_API,BEADS_API,CODY_FRAMEWORK,NOTIFICATION_SERVICE,MONITORING_SERVICE externalLayer
+    class HTTP_PROTOCOL,WEBSOCKET_PROTOCOL,GRAPHQL_PROTOCOL,JSON_RPC_PROTOCOL,MESSAGE_QUEUE_PROTOCOL protocolLayer

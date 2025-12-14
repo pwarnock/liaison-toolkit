@@ -1,0 +1,248 @@
+---
+title: Liaison Toolkit - Database Entity Relationship Diagram
+description: Database schema, tables, and entity relationships in the liaison-toolkit system
+---
+
+erDiagram
+    %% Core Data Entities
+    ISSUE {
+        string id PK
+        string title
+        string description
+        string status
+        number priority
+        string type
+        string assignee
+        json labels
+        json dependencies
+        datetime createdAt
+        datetime updatedAt
+        json metadata
+    }
+
+    TASK {
+        string id PK
+        string title
+        string description
+        string status
+        datetime createdAt
+        datetime closedAt
+        string priority
+    }
+
+    TASKLIST_ROW {
+        number rowIndex PK
+        string id
+        string task
+        string description
+        string dependencies
+        string status
+        string assignedTo
+    }
+
+    %% Configuration Entities
+    UNIFIED_CONFIG {
+        string id PK
+        string version
+        string name
+        string description
+        datetime created
+        datetime updated
+        json githubConfig
+        json codyConfig
+        json beadsConfig
+        json syncConfig
+        json plugins
+        json logging
+    }
+
+    PLUGIN_CONFIG {
+        string id PK
+        string name
+        string version
+        boolean enabled
+        json config
+        datetime created
+        datetime updated
+    }
+
+    %% Event and Sync Entities
+    EVENT {
+        string id PK
+        string type
+        string source
+        datetime timestamp
+        json data
+        string correlationId
+        string causationId
+    }
+
+    SYNC_STATE {
+        string id PK
+        string status
+        datetime lastSync
+        datetime nextSync
+        number progress
+        json errors
+        json stats
+    }
+
+    %% Agent System Entities
+    AGENT {
+        string id PK
+        string name
+        string type
+        json configuration
+        boolean enabled
+        datetime created
+        datetime updated
+    }
+
+    SUBAGENT {
+        string id PK
+        string name
+        string type
+        json configuration
+        string parentAgentId
+        boolean enabled
+        datetime created
+        datetime updated
+    }
+
+    %% Cache and Storage Entities
+    CACHE_ENTRY {
+        string key PK
+        json value
+        datetime expires
+        datetime created
+    }
+
+    SECURITY_CONTEXT {
+        string id PK
+        string user
+        json permissions
+        string session
+        datetime timestamp
+    }
+
+    %% Version and Tasklist Entities
+    VERSION {
+        string id PK
+        string version
+        string description
+        string path
+        string tasklistPath
+        boolean exists
+        datetime createdAt
+    }
+
+    RECONCILE_RESULT {
+        string id PK
+        string version
+        json originalRows
+        json newRows
+        json changes
+        number created
+        number updated
+        number deleted
+        boolean dryRun
+        datetime createdAt
+    }
+
+    %% Conflict Resolution Entities
+    CONFLICT {
+        string id PK
+        string type
+        string source
+        json githubIssue
+        json beadsIssue
+        string field
+        json resolution
+        datetime createdAt
+    }
+
+    %% External System Entities
+    GITHUB_ISSUE {
+        string id PK
+        string repository
+        string number
+        string title
+        string body
+        string state
+        json labels
+        json assignees
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    CODY_FEATURE {
+        string id PK
+        string version
+        string title
+        string description
+        json specifications
+        json dependencies
+        string status
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    %% JSON File Storage Entities (File-based storage)
+    JSON_FILE {
+        string path PK
+        string type
+        json content
+        datetime modified
+        string checksum
+    }
+
+    AGENT_CONFIG_FILE {
+        string path PK
+        string agentType
+        json configuration
+        datetime modified
+        string format
+    }
+
+    %% Relationships
+    ISSUE ||--o{ TASKLIST_ROW : "maps_to"
+    TASKLIST_ROW ||--o{ RECONCILE_RESULT : "part_of"
+    VERSION ||--o{ RECONCILE_RESULT : "generates"
+    VERSION ||--o{ CODY_FEATURE : "contains"
+
+    UNIFIED_CONFIG ||--o{ PLUGIN_CONFIG : "contains"
+    UNIFIED_CONFIG ||--o{ AGENT : "configures"
+
+    AGENT ||--o{ SUBAGENT : "contains"
+
+    SYNC_STATE ||--o{ CONFLICT : "tracks"
+    EVENT ||--o{ CONFLICT : "triggers"
+
+    CACHE_ENTRY ||--|| SECURITY_CONTEXT : "secured_by"
+
+    GITHUB_ISSUE ||--|| ISSUE : "synchronizes_with"
+    CODY_FEATURE ||--|| TASK : "decomposes_to"
+
+    JSON_FILE ||--o{ AGENT_CONFIG_FILE : "contains"
+    JSON_FILE ||--o{ UNIFIED_CONFIG : "stores"
+
+    %% File-based relationships
+    UNIFIED_CONFIG ||--o{ JSON_FILE : "persisted_in"
+    AGENT ||--o{ AGENT_CONFIG_FILE : "configuration_file"
+    PLUGIN_CONFIG ||--o{ JSON_FILE : "persisted_in"
+
+    %% Task tracking relationships
+    TASK ||--o{ TASKLIST_ROW : "derived_from"
+    RECONCILE_RESULT ||--o{ TASK : "creates"
+
+    %% Sync relationships
+    SYNC_STATE ||--|| UNIFIED_CONFIG : "synchronizes"
+    CONFLICT ||--o{ RECONCILE_RESULT : "during"
+
+    %% Event relationships
+    EVENT ||--o{ SYNC_STATE : "updates"
+    AGENT ||--o{ EVENT : "emits"
+
+    %% Security relationships
+    SECURITY_CONTEXT ||--o{ AGENT : "authenticates"
+    SECURITY_CONTEXT ||--o{ SUBAGENT : "authorizes"

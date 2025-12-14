@@ -1,0 +1,362 @@
+---
+title: Liaison Toolkit - Core Model Class Diagram
+description: Core model class structures and relationships in the liaison-toolkit system
+---
+
+classDiagram
+    %% Core Foundation Classes
+    class Plugin {
+        +string name
+        +string version
+        +boolean enabled
+        +Record~string, any~ config
+        +Function~()~ initialize
+        +Function~(input)~ execute
+        +Function~()~ cleanup
+    }
+
+    class PluginManager {
+        +Map~string, Plugin~ plugins
+        +Function~(plugin)~ register
+        +Function~(name)~ unregister
+        +Function~(name)~ get
+        +Function~()~ list
+        +Function~()~ initialize
+        +Function~(name, input)~ execute
+        +Function~()~ cleanup
+    }
+
+    class Cache {
+        +Function~(key)~ get
+        +Function~(key, value, ttl)~ set
+        +Function~(key)~ delete
+        +Function~()~ clear
+        +Function~(key)~ has
+    }
+
+    class Validator {
+        +Function~(data, schema)~ validate
+        +Function~(data)~ sanitize
+    }
+
+    class SecurityManager {
+        +Function~(user, permissions)~ createContext
+        +Function~(context, required)~ validatePermissions
+        +Function~(action, context)~ audit
+    }
+
+    %% Configuration Classes
+    class UnifiedConfig {
+        +string version
+        +string name
+        +string description
+        +string created
+        +string updated
+        +GitHubConfig github
+        +CodyConfig cody
+        +BeadsConfig beads
+        +SyncConfig sync
+        +PluginConfig[] plugins
+        +LoggingConfig logging
+    }
+
+    class Issue {
+        +string id
+        +string title
+        +string description
+        +IssueStatus status
+        +number priority
+        +IssueType type
+        +string assignee
+        +string[] labels
+        +string[] dependencies
+        +DateTime createdAt
+        +DateTime updatedAt
+        +Record~string, any~ metadata
+    }
+
+    class Event {
+        +string id
+        +string type
+        +string source
+        +DateTime timestamp
+        +Record~string, any~ data
+        +string correlationId
+        +string causationId
+    }
+
+    class SyncState {
+        +string id
+        +SyncStatus status
+        +DateTime lastSync
+        +DateTime nextSync
+        +number progress
+        +string[] errors
+        +SyncStats stats
+    }
+
+    %% Liaison-Specific Classes
+    class CLIPlugin {
+        +string name
+        +string version
+        +string description
+        +PluginCommand[] commands
+        +PluginMiddleware[] middleware
+        +PluginHooks hooks
+    }
+
+    class PluginCommand {
+        +string name
+        +string description
+        +CommandOption[] options
+        +CommandHandler handler
+    }
+
+    class CommandResult {
+        +boolean success
+        +string message
+        +any data
+        +string error
+        +boolean dryRun
+    }
+
+    %% Reconciler Classes
+    class Task {
+        +string id
+        +string title
+        +string description
+        +TaskStatus status
+        +DateTime createdAt
+        +DateTime closedAt
+        +TaskPriority priority
+    }
+
+    class TasklistRow {
+        +string id
+        +string task
+        +string description
+        +string dependencies
+        +RowStatus status
+        +string assignedTo
+    }
+
+    class ReconcileResult {
+        +string version
+        +TasklistRow[] originalRows
+        +TasklistRow[] newRows
+        +RowChange[] changes
+        +number created
+        +number updated
+        +number deleted
+        +boolean dryRun
+    }
+
+    %% Adapter Classes
+    class TaskBackendAdapter {
+        +Function~(params)~ getIssues
+        +Function~(id)~ getIssue
+        +Function~(issue)~ createIssue
+        +Function~(id, issue)~ updateIssue
+        +Function~(id)~ deleteIssue
+    }
+
+    class GitHubApiClient {
+        +Function~(params)~ getIssues
+        +Function~(id)~ getIssue
+        +Function~(issue)~ createIssue
+        +Function~(id, issue)~ updateIssue
+        +Function~(id)~ deleteIssue
+        +Function~()~ getLabels
+        +Function~()~ getAssignees
+    }
+
+    class BeadsApiClient {
+        +Function~(params)~ getIssues
+        +Function~(id)~ getIssue
+        +Function~(issue)~ createIssue
+        +Function~(id, issue)~ updateIssue
+        +Function~(id)~ deleteIssue
+        +Function~()~ syncIssues
+    }
+
+    %% Engine Classes
+    class ReconcilerEngine {
+        +TaskBackendAdapter adapter
+        +TasklistParser parser
+        +Cache cache
+        +EventBus eventBus
+        +Function~(version, options)~ reconcile
+        +Function~(taskId)~ reconcileTask
+        +Function~()~ getSyncState
+    }
+
+    class TasklistParser {
+        +Function~(path)~ parseFile
+        +Function~(content)~ parseContent
+        +Function~(rows)~ validateRows
+        +Function~(rows)~ normalizeRows
+    }
+
+    %% Event System Classes
+    class EventBus {
+        +Function~(event)~ emit
+        +Function~(eventType, handler)~ on
+        +Function~(eventType, handler)~ off
+        +Function~(eventType, handler)~ once
+        +Function~(eventType)~ removeAllListeners
+    }
+
+    class EventStore {
+        +Function~(event)~ append
+        +Function~(aggregateId, fromVersion)~ getEvents
+        +Function~(eventType, from, to)~ getEventsByType
+        +Function~(correlationId)~ getEventsByCorrelationId
+    }
+
+    %% Sync Engine Classes
+    class SyncEngine {
+        +Function~(options)~ sync
+        +Function~(issueId)~ syncIssue
+        +Function~()~ getSyncState
+        +Function~(strategy)~ setConflictResolution
+        +Function~(listener)~ addConflictListener
+    }
+
+    class ConflictResolver {
+        +Function~(conflict)~ resolve
+        +Function~(strategy)~ addStrategy
+        +Function~(strategy)~ setDefaultStrategy
+    }
+
+    %% Relationships
+    PluginManager ||--o{ Plugin : manages
+    PluginManager ||--o{ CLIPlugin : extends
+    CLIPlugin ||--o{ PluginCommand : contains
+    CLIPlugin ||--o{ PluginMiddleware : contains
+    CLIPlugin ||--o{ PluginHooks : contains
+
+    UnifiedConfig ||--o{ GitHubConfig : github
+    UnifiedConfig ||--o{ CodyConfig : cody
+    UnifiedConfig ||--o{ BeadsConfig : beads
+    UnifiedConfig ||--o{ SyncConfig : sync
+    UnifiedConfig ||--o{ PluginConfig[] : plugins
+
+    TaskBackendAdapter <|-- GitHubApiClient : implements
+    TaskBackendAdapter <|-- BeadsApiClient : implements
+
+    ReconcilerEngine ||--|> TaskBackendAdapter : uses
+    ReconcilerEngine ||--|> TasklistParser : uses
+    ReconcilerEngine ||--|> Cache : uses
+    ReconcilerEngine ||--|> EventBus : uses
+
+    SyncEngine ||--|> ReconcilerEngine : extends
+    ConflictResolver ||--o{ SyncEngine : resolves
+
+    EventBus ||--o{ EventStore : persists
+    Event ||--o{ EventStore : stored_in
+
+    Task ||--o{ TasklistRow : maps_to
+    TasklistRow ||--o{ ReconcileResult : part_of
+
+    SyncState ||--o{ SyncStats : contains
+
+    %% Enumerations
+    class IssueStatus {
+        <<enumeration>>
+        open
+        in_progress
+        closed
+        cancelled
+    }
+
+    class IssueType {
+        <<enumeration>>
+        bug
+        feature
+        task
+        epic
+        chore
+    }
+
+    class TaskStatus {
+        <<enumeration>>
+        open
+        closed
+        deleted
+    }
+
+    class TaskPriority {
+        <<enumeration>>
+        low
+        medium
+        high
+        critical
+    }
+
+    class RowStatus {
+        <<enumeration>>
+        todo
+        done
+        deleted
+    }
+
+    class SyncStatus {
+        <<enumeration>>
+        idle
+        syncing
+        error
+        completed
+    }
+
+    %% Utility Classes
+    class SyncStats {
+        +number total
+        +number processed
+        +number succeeded
+        +number failed
+    }
+
+    class LoggingConfig {
+        +LogLevel level
+        +string file
+        +boolean console
+    }
+
+    class GitHubConfig {
+        +string token
+        +string username
+        +string repository
+        +string apiUrl
+        +number timeout
+        +number retries
+        +RateLimitConfig rateLimit
+    }
+
+    class BeadsConfig {
+        +boolean enabled
+        +string dataPath
+        +boolean autoSync
+        +number syncInterval
+        +string[] issueTypes
+        +number[] priorities
+    }
+
+    class SyncConfig {
+        +boolean enabled
+        +SyncDirection direction
+        +ConflictResolution conflictResolution
+        +BatchProcessingConfig batchProcessing
+        +FilterConfig filters
+    }
+
+    %% Relationships to enumerations and configs
+    Issue ||--|| IssueStatus : status
+    Issue ||--|| IssueType : type
+    Task ||--|| TaskStatus : status
+    Task ||--|| TaskPriority : priority
+    TasklistRow ||--|| RowStatus : status
+    SyncState ||--|| SyncStatus : status
+    UnifiedConfig ||--|| LoggingConfig : logging
+    UnifiedConfig ||--|| GitHubConfig : github
+    UnifiedConfig ||--|| BeadsConfig : beads
+    UnifiedConfig ||--|| SyncConfig : sync
