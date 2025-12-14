@@ -54,13 +54,15 @@ describe('ReconcilerEngine', () => {
     });
 
     it('marks row done when backend task is closed', async () => {
+      const closedTask: Task = {
+        id: 'abc-001',
+        title: 'Auth module',
+        status: TaskStatus.Closed,
+        createdAt: new Date(),
+      };
       const adapter = createMockAdapter({
-        getTask: vi.fn().mockResolvedValue({
-          id: 'abc-001',
-          title: 'Auth module',
-          status: TaskStatus.Closed,
-          createdAt: new Date(),
-        }),
+        listTasks: vi.fn().mockResolvedValue([closedTask]),
+        getTask: vi.fn().mockResolvedValue(closedTask),
       });
       const engine = new ReconcilerEngine(adapter);
 
@@ -145,13 +147,15 @@ describe('ReconcilerEngine', () => {
     });
 
     it('does not change row when task is open and row is todo', async () => {
+      const openTask: Task = {
+        id: 'abc-001',
+        title: 'Auth module',
+        status: TaskStatus.Open,
+        createdAt: new Date(),
+      };
       const adapter = createMockAdapter({
-        getTask: vi.fn().mockResolvedValue({
-          id: 'abc-001',
-          title: 'Auth module',
-          status: TaskStatus.Open,
-          createdAt: new Date(),
-        }),
+        listTasks: vi.fn().mockResolvedValue([openTask]),
+        getTask: vi.fn().mockResolvedValue(openTask),
       });
       const engine = new ReconcilerEngine(adapter);
 
@@ -192,6 +196,12 @@ describe('ReconcilerEngine', () => {
     });
 
     it('reconciles multiple rows with mixed states', async () => {
+      const closedTask: Task = {
+        id: 'abc-001',
+        title: 'Auth',
+        status: TaskStatus.Closed,
+        createdAt: new Date(),
+      };
       const adapter = createMockAdapter({
         createTask: vi.fn().mockResolvedValue({
           id: 'new-001',
@@ -199,14 +209,10 @@ describe('ReconcilerEngine', () => {
           status: TaskStatus.Open,
           createdAt: new Date(),
         }),
+        listTasks: vi.fn().mockResolvedValue([closedTask]), // Only abc-001 exists; abc-002 is deleted
         getTask: vi.fn((id: string) => {
           if (id === 'abc-001') {
-            return Promise.resolve({
-              id: 'abc-001',
-              title: 'Auth',
-              status: TaskStatus.Closed,
-              createdAt: new Date(),
-            });
+            return Promise.resolve(closedTask);
           }
           if (id === 'abc-002') {
             return Promise.resolve(null); // Deleted
