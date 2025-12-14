@@ -8,7 +8,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import { spawn } from 'child_process';
-import { agenticWorkflowManager } from '../agentic-workflow-manager';
+import { getAgenticWorkflowManager } from '../agentic-workflow-manager';
 import { APIEndpoint } from '../api-response-monitor';
 
 /**
@@ -20,142 +20,147 @@ function getSubtaskDefinitions(workflowId: string): Array<{
   priority?: 'low' | 'medium' | 'high' | 'critical';
   workflowTrigger?: string;
 }> {
-  const definitions: Record<string, Array<{
-    title: string;
-    description?: string;
-    priority?: 'low' | 'medium' | 'high' | 'critical';
-    workflowTrigger?: string;
-  }>> = {
+  const definitions: Record<
+    string,
+    Array<{
+      title: string;
+      description?: string;
+      priority?: 'low' | 'medium' | 'high' | 'critical';
+      workflowTrigger?: string;
+    }>
+  > = {
     'security-response': [
       {
         title: 'Investigate security vulnerability',
         description: 'Analyze the security issue and determine impact',
         priority: 'critical',
-        workflowTrigger: 'investigation'
+        workflowTrigger: 'investigation',
       },
       {
         title: 'Isolate affected systems',
         description: 'Contain the vulnerability to prevent further damage',
         priority: 'high',
-        workflowTrigger: 'containment'
+        workflowTrigger: 'containment',
       },
       {
         title: 'Develop security patch',
         description: 'Create and test patch for the vulnerability',
         priority: 'high',
-        workflowTrigger: 'development'
+        workflowTrigger: 'development',
       },
       {
         title: 'Verify fix effectiveness',
         description: 'Test that the patch resolves the security issue',
         priority: 'medium',
-        workflowTrigger: 'verification'
-      }
+        workflowTrigger: 'verification',
+      },
     ],
     'bug-fix': [
       {
         title: 'Reproduce the bug',
         description: 'Create reliable reproduction steps',
         priority: 'high',
-        workflowTrigger: 'investigation'
+        workflowTrigger: 'investigation',
       },
       {
         title: 'Debug root cause',
         description: 'Identify the underlying cause of the bug',
         priority: 'high',
-        workflowTrigger: 'debugging'
+        workflowTrigger: 'debugging',
       },
       {
         title: 'Implement fix',
         description: 'Code the solution for the bug',
         priority: 'medium',
-        workflowTrigger: 'development'
+        workflowTrigger: 'development',
       },
       {
         title: 'Test fix thoroughly',
-        description: 'Ensure the fix works and doesn\'t break other functionality',
+        description: "Ensure the fix works and doesn't break other functionality",
         priority: 'medium',
-        workflowTrigger: 'testing'
+        workflowTrigger: 'testing',
       },
       {
         title: 'Deploy fix to production',
         description: 'Release the fix to the production environment',
         priority: 'low',
-        workflowTrigger: 'deployment'
-      }
+        workflowTrigger: 'deployment',
+      },
     ],
     'high-priority-response': [
       {
         title: 'Assign appropriate team members',
         description: 'Ensure the right people are working on this priority issue',
         priority: 'high',
-        workflowTrigger: 'assignment'
+        workflowTrigger: 'assignment',
       },
       {
         title: 'Escalate if needed',
         description: 'Bring in additional resources if required',
         priority: 'medium',
-        workflowTrigger: 'escalation'
+        workflowTrigger: 'escalation',
       },
       {
         title: 'Notify stakeholders',
         description: 'Keep relevant parties informed of progress',
         priority: 'medium',
-        workflowTrigger: 'notification'
+        workflowTrigger: 'notification',
       },
       {
         title: 'Track progress closely',
         description: 'Monitor resolution progress and timeline',
         priority: 'low',
-        workflowTrigger: 'monitoring'
-      }
+        workflowTrigger: 'monitoring',
+      },
     ],
     'documentation-update': [
       {
         title: 'Update documentation content',
         description: 'Revise relevant documentation sections',
         priority: 'medium',
-        workflowTrigger: 'content-update'
+        workflowTrigger: 'content-update',
       },
       {
         title: 'Review documentation changes',
         description: 'Ensure accuracy and completeness of updates',
         priority: 'medium',
-        workflowTrigger: 'review'
+        workflowTrigger: 'review',
       },
       {
         title: 'Publish updated documentation',
         description: 'Release updated documentation to users',
         priority: 'low',
-        workflowTrigger: 'publication'
-      }
+        workflowTrigger: 'publication',
+      },
     ],
     'stability-remediation': [
       {
         title: 'Analyze stability issue',
-        description: 'Investigate root cause of stability problem including performance metrics, error logs, and system resources',
+        description:
+          'Investigate root cause of stability problem including performance metrics, error logs, and system resources',
         priority: 'high',
-        workflowTrigger: 'investigation'
+        workflowTrigger: 'investigation',
       },
       {
         title: 'Implement remediation',
         description: 'Apply appropriate fix for stability issue based on analysis findings',
         priority: 'high',
-        workflowTrigger: 'development'
+        workflowTrigger: 'development',
       },
       {
         title: 'Verify fix effectiveness',
-        description: 'Test that stability issue is resolved and system performance meets requirements',
+        description:
+          'Test that stability issue is resolved and system performance meets requirements',
         priority: 'medium',
-        workflowTrigger: 'verification'
+        workflowTrigger: 'verification',
       },
       {
         title: 'Monitor system stability',
         description: 'Continuously monitor system to ensure stability issue does not recur',
         priority: 'low',
-        workflowTrigger: 'monitoring'
-      }
-    ]
+        workflowTrigger: 'monitoring',
+      },
+    ],
   };
 
   return definitions[workflowId] || [];
@@ -169,7 +174,7 @@ function executeWorkflowScript(scriptName: string, args: string[] = []): Promise
     const scriptPath = `scripts/${scriptName}`;
     const childProcess = spawn('python3', [scriptPath, ...args], {
       stdio: 'pipe',
-      cwd: process.cwd()
+      cwd: process.cwd(),
     });
 
     let output = '';
@@ -207,29 +212,32 @@ export function createWorkflowCommand(): Command {
     .command('list')
     .description('List all available workflows')
     .option('--json', 'Output as JSON')
-    .action(async (options) => {
-      const spinner = ora('Fetching workflows...').start();
-
+    .action(async options => {
       try {
         // Get workflows from Python script
-        const output = await executeWorkflowScript('list-workflows.py', options.json ? ['--json'] : []);
-        
-        spinner.stop();
-        
+        const output = await executeWorkflowScript(
+          'list-workflows.py',
+          options.json ? ['--json'] : []
+        );
+
         if (options.json) {
           console.log(output);
         } else {
           // Show agentic workflow manager stats
+          const agenticWorkflowManager = getAgenticWorkflowManager();
           const stats = agenticWorkflowManager.getTriggerStats();
           console.log(chalk.blue('\n🤖 Agentic Workflow Manager Status:'));
           console.log(`  Total Triggers: ${stats.totalTriggers}`);
           console.log(`  Recent Events: ${stats.recentEvents.length}`);
           console.log();
-          
+
           console.log(output);
         }
+        
+        // Explicit exit to prevent hanging
+        process.exit(0);
       } catch (error) {
-        spinner.fail(chalk.red(`Failed to list workflows: ${error}`));
+        console.error(chalk.red(`Failed to list workflows: ${error}`));
         process.exit(1);
       }
     });
@@ -251,9 +259,10 @@ export function createWorkflowCommand(): Command {
         if (options.description) args.push('--description', options.description);
 
         const output = await executeWorkflowScript('create-workflow.py', args);
-        
+
         spinner.succeed(chalk.green('Workflow created'));
         console.log(output);
+        process.exit(0);
       } catch (error) {
         spinner.fail(chalk.red(`Failed to create workflow: ${error}`));
         process.exit(1);
@@ -275,11 +284,12 @@ export function createWorkflowCommand(): Command {
         if (options.taskId) args.push('--task-id', options.taskId);
 
         const output = await executeWorkflowScript('run-workflow.py', args);
-        
+
         spinner.succeed(chalk.green('Workflow executed'));
         console.log(output);
-        
+
         // Emit workflow execution event for agentic manager
+        const agenticWorkflowManager = getAgenticWorkflowManager();
         agenticWorkflowManager.emit('workflow.executed', {
           workflowId: name,
           taskId: options.taskId,
@@ -303,6 +313,7 @@ export function createWorkflowCommand(): Command {
           }
         }
         
+        process.exit(0);
       } catch (error) {
         spinner.fail(chalk.red(`Failed to run workflow: ${error}`));
         process.exit(1);
@@ -322,9 +333,10 @@ export function createWorkflowCommand(): Command {
         if (options.recurring) args.push('--recurring');
 
         const output = await executeWorkflowScript('schedule-workflow.py', args);
-        
+
         spinner.succeed(chalk.green('Workflow scheduled'));
         console.log(output);
+        process.exit(0);
       } catch (error) {
         spinner.fail(chalk.red(`Failed to schedule workflow: ${error}`));
         process.exit(1);
@@ -345,9 +357,10 @@ export function createWorkflowCommand(): Command {
         if (options.json) args.push('--json');
 
         const output = await executeWorkflowScript('show-workflow-logs.py', args);
-        
+
         spinner.stop();
         console.log(output);
+        process.exit(0);
       } catch (error) {
         spinner.fail(chalk.red(`Failed to fetch logs: ${error}`));
         process.exit(1);
@@ -361,19 +374,22 @@ export function createWorkflowCommand(): Command {
     .action(async () => {
       console.log(chalk.blue('🎯 Workflow Trigger Configuration:\n'));
       
+      const agenticWorkflowManager = getAgenticWorkflowManager();
       const stats = agenticWorkflowManager.getTriggerStats();
-      
+
       console.log(chalk.bold('Trigger Statistics:'));
       console.log(`  Total Triggers: ${stats.totalTriggers}`);
       console.log(`  Triggers by Type:`);
-      
+
       Object.entries(stats.triggersByType).forEach(([type, count]) => {
         console.log(`    ${type}: ${count}`);
       });
-      
-console.log(chalk.bold('\nRecent Events:'));
+
+      console.log(chalk.bold('\nRecent Events:'));
       stats.recentEvents.forEach((event: any, index: number) => {
-        console.log(`  ${index + 1}. ${event.type.toUpperCase()} - ${event.taskId} (${event.timestamp.toISOString()})`);
+        console.log(
+          `  ${index + 1}. ${event.type.toUpperCase()} - ${event.taskId} (${event.timestamp.toISOString()})`
+        );
       });
 
       // Show file system watcher stats
@@ -395,6 +411,9 @@ console.log(chalk.bold('\nRecent Events:'));
         console.log(`  Failed Endpoints: ${apiStats.failedEndpoints}`);
         console.log(`  Uptime: ${Math.round(apiStats.uptime)}s`);
       }
+      
+      // Explicit exit to prevent hanging
+      process.exit(0);
     });
 
   // liaison workflow watch
@@ -406,6 +425,7 @@ console.log(chalk.bold('\nRecent Events:'));
       if (options.stop) {
         const spinner = ora(`Stopping file system watcher for ${path}...`).start();
         try {
+          const agenticWorkflowManager = getAgenticWorkflowManager();
           agenticWorkflowManager.stopFileSystemWatching([path]);
           spinner.succeed(chalk.green(`Stopped watching ${path}`));
         } catch (error) {
@@ -415,18 +435,20 @@ console.log(chalk.bold('\nRecent Events:'));
       } else {
         const spinner = ora(`Starting file system watcher for ${path}...`).start();
         try {
+          const agenticWorkflowManager = getAgenticWorkflowManager();
           agenticWorkflowManager.startFileSystemWatching([path]);
           spinner.succeed(chalk.green(`Now watching ${path} for changes`));
           console.log(chalk.blue('📁 File system triggers are now active'));
           console.log(chalk.yellow('Press Ctrl+C to stop watching'));
-          
+
           // Keep process alive to continue watching
           process.on('SIGINT', () => {
             console.log(chalk.blue('\n📁 Stopping file system watchers...'));
+            const agenticWorkflowManager = getAgenticWorkflowManager();
             agenticWorkflowManager.stopFileSystemWatching();
             process.exit(0);
           });
-          
+
           // Prevent process from exiting
           setInterval(() => {}, 1000);
         } catch (error) {
@@ -442,64 +464,68 @@ console.log(chalk.bold('\nRecent Events:'));
     .description('Show file system watcher status')
     .action(async () => {
       console.log(chalk.blue('📁 File System Watcher Status:\n'));
-      
+
+      const agenticWorkflowManager = getAgenticWorkflowManager();
       const stats = agenticWorkflowManager.getFileSystemWatcherStats();
-      
+
       if (!stats) {
         console.log(chalk.yellow('File system watcher not initialized'));
-        return;
+        process.exit(0);
       }
-      
+
       console.log(chalk.bold('Watcher Statistics:'));
       console.log(`  Total Triggers: ${stats.totalTriggers}`);
       console.log(`  Active Watchers: ${stats.activeWatchers}`);
       console.log(`  Watched Paths: ${stats.watchedPaths.join(', ') || 'None'}`);
       console.log(`  Last Git Commit: ${stats.lastGitCommit || 'None'}`);
-      
+
       console.log(chalk.bold('\nTriggers by Type:'));
       Object.entries(stats.triggersByType).forEach(([type, count]) => {
         console.log(`  ${type}: ${count}`);
       });
-      
+
       console.log(chalk.bold('\nRecent File System Events:'));
       stats.recentEvents.forEach((event: any, index: number) => {
-        console.log(`  ${index + 1}. ${event.type.toUpperCase()} - ${event.path} (${event.timestamp.toISOString()})`);
+        console.log(
+          `  ${index + 1}. ${event.type.toUpperCase()} - ${event.path} (${event.timestamp.toISOString()})`
+        );
       });
+      
+      process.exit(0);
     });
 
   // liaison api commands
-  const apiCommand = new Command('api')
-    .description('Manage API monitoring endpoints');
+  const apiCommand = new Command('api').description('Manage API monitoring endpoints');
 
   // liaison api list
   apiCommand
     .command('list')
     .description('List all API endpoints')
     .option('--json', 'Output as JSON')
-    .action(async (options) => {
+    .action(async options => {
       const spinner = ora('Fetching API endpoints...').start();
-      
+
       try {
+        const agenticWorkflowManager = getAgenticWorkflowManager();
         const endpoints = agenticWorkflowManager.getAPIEndpoints();
-        
+
         spinner.stop();
-        
+
         if (options.json) {
           console.log(JSON.stringify(endpoints, null, 2));
         } else {
           console.log(chalk.blue('🔍 API Endpoints:\n'));
-          
+
           endpoints.forEach((endpoint: APIEndpoint) => {
-            const status = endpoint.enabled ? 
-              chalk.green('✅ Enabled') : 
-              chalk.red('❌ Disabled');
-            const lastCheck = endpoint.lastChecked ? 
-              new Date(endpoint.lastChecked).toLocaleString() : 
-              'Never';
-            const failures = endpoint.consecutiveFailures > 0 ? 
-              chalk.red(`(${endpoint.consecutiveFailures} failures)`) : 
-              '';
-            
+            const status = endpoint.enabled ? chalk.green('✅ Enabled') : chalk.red('❌ Disabled');
+            const lastCheck = endpoint.lastChecked
+              ? new Date(endpoint.lastChecked).toLocaleString()
+              : 'Never';
+            const failures =
+              endpoint.consecutiveFailures > 0
+                ? chalk.red(`(${endpoint.consecutiveFailures} failures)`)
+                : '';
+
             console.log(chalk.bold(`  ${endpoint.name} (${endpoint.id})`));
             console.log(`    URL: ${endpoint.url}`);
             console.log(`    Method: ${endpoint.method}`);
@@ -508,6 +534,8 @@ console.log(chalk.bold('\nRecent Events:'));
             console.log(`    Last Check: ${lastCheck}`);
             console.log('');
           });
+          
+          process.exit(0);
         }
       } catch (error) {
         spinner.fail(chalk.red(`Failed to list endpoints: ${error}`));
@@ -525,7 +553,7 @@ console.log(chalk.bold('\nRecent Events:'));
     .option('--enabled', 'Enable endpoint immediately', false)
     .action(async (id: string, name: string, url: string, options) => {
       const spinner = ora(`Adding API endpoint ${name}...`).start();
-      
+
       try {
         const endpoint: APIEndpoint = {
           id,
@@ -535,11 +563,12 @@ console.log(chalk.bold('\nRecent Events:'));
           timeout: parseInt(options.timeout),
           interval: parseInt(options.interval),
           enabled: options.enabled,
-          consecutiveFailures: 0
+          consecutiveFailures: 0,
         };
-        
+
+        const agenticWorkflowManager = getAgenticWorkflowManager();
         agenticWorkflowManager.addAPIEndpoint(endpoint);
-        
+
         spinner.succeed(chalk.green(`Added API endpoint: ${name}`));
         console.log(chalk.blue(`Endpoint ID: ${id}`));
         console.log(chalk.blue(`URL: ${url}`));
@@ -556,8 +585,9 @@ console.log(chalk.bold('\nRecent Events:'));
     .description('Remove an API endpoint')
     .action(async (id: string) => {
       const spinner = ora(`Removing API endpoint ${id}...`).start();
-      
+
       try {
+        const agenticWorkflowManager = getAgenticWorkflowManager();
         agenticWorkflowManager.removeAPIEndpoint(id);
         spinner.succeed(chalk.green(`Removed API endpoint: ${id}`));
       } catch (error) {
@@ -572,8 +602,9 @@ console.log(chalk.bold('\nRecent Events:'));
     .description('Enable an API endpoint')
     .action(async (id: string) => {
       const spinner = ora(`Enabling API endpoint ${id}...`).start();
-      
+
       try {
+        const agenticWorkflowManager = getAgenticWorkflowManager();
         agenticWorkflowManager.updateAPIEndpoint(id, { enabled: true });
         spinner.succeed(chalk.green(`Enabled API endpoint: ${id}`));
       } catch (error) {
@@ -587,8 +618,9 @@ console.log(chalk.bold('\nRecent Events:'));
     .description('Disable an API endpoint')
     .action(async (id: string) => {
       const spinner = ora(`Disabling API endpoint ${id}...`).start();
-      
+
       try {
+        const agenticWorkflowManager = getAgenticWorkflowManager();
         agenticWorkflowManager.updateAPIEndpoint(id, { enabled: false });
         spinner.succeed(chalk.green(`Disabled API endpoint: ${id}`));
       } catch (error) {
@@ -603,8 +635,9 @@ console.log(chalk.bold('\nRecent Events:'));
     .description('Manually check an API endpoint')
     .action(async (id: string) => {
       const spinner = ora(`Checking API endpoint ${id}...`).start();
-      
+
       try {
+        const agenticWorkflowManager = getAgenticWorkflowManager();
         await agenticWorkflowManager.checkAPIEndpoint(id);
         spinner.succeed(chalk.green(`Checked API endpoint: ${id}`));
       } catch (error) {
@@ -619,8 +652,9 @@ console.log(chalk.bold('\nRecent Events:'));
     .description('Start API monitoring')
     .action(async () => {
       const spinner = ora('Starting API monitoring...').start();
-      
+
       try {
+        const agenticWorkflowManager = getAgenticWorkflowManager();
         await agenticWorkflowManager.startAPIMonitoring();
         spinner.succeed(chalk.green('API monitoring started'));
       } catch (error) {
@@ -634,8 +668,9 @@ console.log(chalk.bold('\nRecent Events:'));
     .description('Stop API monitoring')
     .action(async () => {
       const spinner = ora('Stopping API monitoring...').start();
-      
+
       try {
+        const agenticWorkflowManager = getAgenticWorkflowManager();
         await agenticWorkflowManager.stopAPIMonitoring();
         spinner.succeed(chalk.green('API monitoring stopped'));
       } catch (error) {

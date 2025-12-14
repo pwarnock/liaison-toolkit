@@ -1,30 +1,46 @@
 {
-  "name": "@pwarnock/opencode-config",
-  "version": "0.2.0",
-  "description": "Python-based configuration and git automation for Liaison Toolkit and OpenCode agent",
-  "main": "index.js",
+  "name": "@pwarnock/opencode_config",
+  "version": "1.0.0",
+  "description": "OpenCode configuration package for liaison-toolkit",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "type": "module",
   "scripts": {
-    "build": "echo 'Python package - no build step required'",
-    "test": "cd ../../ && uv run python -m pytest packages/opencode_config/",
-    "lint": "echo 'Python linting handled by uv/ruff'",
-    "format": "echo 'Python formatting handled by uv/black'",
-    "clean": "echo 'Python package - no clean step required'"
+    "build": "bun build src/index.ts --outdir dist --target node --format esm",
+    "dev": "bun --watch src/index.ts",
+    "type-check": "tsc --noEmit",
+    "test": "bun test",
+    "lint": "eslint src --ext .ts",
+    "setup": "bun src/scripts/setup.ts",
+    "prepublishOnly": "bun run build"
   },
   "keywords": [
-    "python",
-    "configuration",
     "opencode",
-    "workflow",
-    "agents"
+    "ai",
+    "agents",
+    "configuration"
   ],
-  "author": "Liaison Toolkit Contributors",
+  "author": "Patrick Warnock",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/pwarnock/liaison-toolkit.git",
-    "directory": "packages/opencode_config"
+  "dependencies": {
+    "@types/node": "^25.0.2"
   },
-  "publishConfig": {
-    "access": "restricted"
-  }
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "bun-types": "latest",
+    "eslint": "^8.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./templates": "./templates/",
+    "./scripts": "./src/scripts/"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "src/scripts"
+  ]
 }

@@ -1,0 +1,35 @@
+# Documentation Writer
+
+A specialized agent for creating, updating, and improving technical documentation.
+
+## Configuration
+
+```json
+{
+  "name": "docs-writer",
+  "description": "Creates and improves technical documentation, README files, and API docs",
+  "model": "{{model}}",
+  "temperature": 0.4,
+  "maxTokens": 8000,
+  "systemPrompt": "You are a Documentation Writer, specialized in creating clear, comprehensive technical documentation. Your role is to produce well-structured, easy-to-understand documentation including README files, API documentation, guides, and technical specifications. Focus on clarity, accuracy, and user experience.",
+  "tools": ["read", "write", "edit", "webfetch"]
+}
+```
+
+## Model Details
+
+- **Model**: {{modelName}}
+- **Context Window**: {{contextWindow}} tokens
+- **Input Cost**: ${{inputCost}}/1K tokens
+- **Output Cost**: ${{outputCost}}/1K tokens
+
+## Usage
+
+This agent is configured to work with OpenCode v2 and provides specialized capabilities for:
+
+- Creating README files and documentation
+- Writing API documentation
+- Developing user guides and tutorials
+- Improving existing documentation
+
+Use this agent when you need assistance with documentation creation, technical writing, or improving existing documentation quality.

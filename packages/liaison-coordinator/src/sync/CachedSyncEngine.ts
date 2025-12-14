@@ -67,19 +67,41 @@ export class CachedSyncEngine {
     beadsWorkspaceId: string,
     cacheConfig?: any
   ) {
-    this.cache = new CacheManager(cacheConfig);
-    this.githubClient = new CachedGitHubClient(
-      githubToken,
-      githubOwner,
-      githubRepo,
-      cacheConfig
-    );
-    this.beadsClient = new CachedBeadsClient(
-      beadsApiKey,
-      beadsWorkspaceId,
-      undefined,
-      cacheConfig
-    );
+    // Check if caching is disabled
+    const disableCache = process.env.DISABLE_CACHE === 'true' ||
+                        process.env.CACHE_ENABLED === 'false' ||
+                        process.env.SYNC_CACHE_ENABLED === 'false';
+
+    if (disableCache) {
+      const noCacheConfig: any = { backend: 'none' as const };
+      this.cache = new CacheManager(noCacheConfig);
+      this.githubClient = new CachedGitHubClient(
+        githubToken,
+        githubOwner,
+        githubRepo,
+        noCacheConfig
+      );
+      this.beadsClient = new CachedBeadsClient(
+        beadsApiKey,
+        beadsWorkspaceId,
+        undefined,
+        noCacheConfig
+      );
+    } else {
+      this.cache = new CacheManager(cacheConfig);
+      this.githubClient = new CachedGitHubClient(
+        githubToken,
+        githubOwner,
+        githubRepo,
+        cacheConfig
+      );
+      this.beadsClient = new CachedBeadsClient(
+        beadsApiKey,
+        beadsWorkspaceId,
+        undefined,
+        cacheConfig
+      );
+    }
     this.syncId = this.generateSyncId();
   }
 

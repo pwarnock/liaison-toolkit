@@ -47,11 +47,11 @@ export async function checkForDuplicates(
     });
 
     let stdout = '';
-    let stderr = '';
-    let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+    let _stderr = '';
+    let _timeoutHandle: ReturnType<typeof setTimeout> | null = null;
 
     // Set a timeout to prevent hanging
-    timeoutHandle = setTimeout(() => {
+    _timeoutHandle = setTimeout(() => {
       child.kill();
       resolve({
         hasDuplicates: false,
@@ -65,11 +65,11 @@ export async function checkForDuplicates(
     });
 
     child.stderr.on('data', (data) => {
-      stderr += data.toString();
+      _stderr += data.toString();
     });
 
-    child.on('close', (exitCode) => {
-      if (timeoutHandle) clearTimeout(timeoutHandle);
+    child.on('close', (_exitCode) => {
+      if (_timeoutHandle) clearTimeout(_timeoutHandle);
 
       // Parse output to extract matches
       const matches: DuplicateMatch[] = [];
@@ -78,7 +78,7 @@ export async function checkForDuplicates(
       try {
         // Normalize output to handle unicode characters
         const normalized = stdout
-          .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII
+          .replace(/[\x00-\x1F]/g, '') // Remove control characters
           .toLowerCase();
 
         // Check if "No duplicates found" is in output
@@ -147,7 +147,7 @@ export async function checkForDuplicates(
     });
 
     child.on('error', (err) => {
-      if (timeoutHandle) clearTimeout(timeoutHandle);
+      if (_timeoutHandle) clearTimeout(_timeoutHandle);
       resolve({
         hasDuplicates: false,
         matches: [],

@@ -2,6 +2,36 @@
 
 > Intelligent mediator system connecting AI agent builders with issue trackers
 
+## 🤖 OpenCode Integration (Optional)
+
+Liaison includes optional OpenCode configuration management for AI agent setup:
+
+### Quick Start with OpenCode
+
+```bash
+# Install liaison with OpenCode support
+npm install @pwarnock/liaison @pwarnock/opencode_config
+
+# Setup OpenCode configuration in your project
+liaison opencode --agents "library-researcher,code-reviewer" --model big-pickle
+
+# Create individual agents
+liaison opencode agent my-agent --template custom-agent --model grok-fast
+
+# List available models and templates
+liaison opencode --list-models
+liaison opencode --list-agents
+```
+
+### OpenCode Features
+
+- **🧠 Free Model Registry**: Pre-configured free AI models (Big Pickle, Grok Fast, KAT-Coder)
+- **📝 Agent Templates**: Specialized templates for code review, research, documentation
+- **⚙️ Configuration Management**: Automatic `.opencode/` directory setup
+- **🔧 CLI Integration**: Seamless integration with Liaison CLI
+
+**Note**: OpenCode is completely optional. Install `@pwarnock/opencode_config` only if you need AI agent configuration.
+
 ## 🚀 Quick Start - Dogfooding Workflow
 
 ### Install in Any Project (Recommended)
@@ -68,6 +98,18 @@ just test
 node packages/liaison/bin/liaison.js --help
 ```
 
+#### Option 4: With OpenCode Support
+```bash
+# Install with OpenCode configuration
+npm install @pwarnock/liaison @pwarnock/opencode_config
+
+# Setup AI agents for your project
+liaison opencode --agents "library-researcher,docs-writer" --model kat-coder
+
+# Create individual agents
+liaison opencode agent my-agent --template custom-agent --model grok-fast
+```
+
 ### Development Setup
 #### Prerequisites
 - **Just** - Modern task runner (recommended)
@@ -90,6 +132,12 @@ just build
 # Run tests
 just test
 ```
+
+## 📚 Documentation
+
+- **[OpenCode Guide](./docs/OPENCODE_GUIDE.md)** - Complete AI agent configuration guide
+- **[Task-Driven Workflows](./docs/workflows/task-driven-workflow-order.md)** - Automation workflow guide
+- **[Architecture](./docs/architecture/)** - System architecture documentation
 
 ## 🛠️ Development Workflow
 

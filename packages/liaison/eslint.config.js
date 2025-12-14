@@ -1,18 +1,19 @@
 import js from '@eslint/js'
-import tsPlugin from '@typescript-eslint/eslint-plugin'
-import tsParser from '@typescript-eslint/parser'
+import tseslint from '@typescript-eslint/eslint-plugin'
+import tsparser from '@typescript-eslint/parser'
 
 export default [
   {
-    ignores: ['dist/', 'node_modules/', '.turbo/']
+    ignores: ['dist/', 'node_modules/', '.turbo/', 'coverage/']
   },
   {
     files: ['src/**/*.ts'],
     languageOptions: {
-      parser: tsParser,
+      parser: tsparser,
       parserOptions: {
         ecmaVersion: 2020,
-        sourceType: 'module'
+        sourceType: 'module',
+        project: './tsconfig.json'
       },
       globals: {
         console: 'readonly',
@@ -27,20 +28,33 @@ export default [
         clearInterval: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
-        NodeJS: 'readonly'
+        NodeJS: 'readonly',
+        AbortController: 'readonly',
+        RequestInit: 'readonly',
+        fetch: 'readonly'
       }
     },
     plugins: {
-      '@typescript-eslint': tsPlugin
+      '@typescript-eslint': tseslint
     },
     rules: {
       ...js.configs.recommended.rules,
-      ...tsPlugin.configs.recommended.rules,
+      ...tseslint.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['error', {
         argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_'
-      }]
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'
+      }],
+      'no-control-regex': 'off'
+    },
+    settings: {
+      'import/resolver': {
+        typescript: {
+          alwaysTryTypes: true,
+          project: './tsconfig.json'
+        }
+      }
     }
   }
 ]

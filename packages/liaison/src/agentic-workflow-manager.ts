@@ -39,8 +39,9 @@ export class AgenticWorkflowManager extends EventEmitter {
     super();
     this.setupDefaultTriggers();
     this.setupWorkflowCompletionListener();
-    this.fileSystemWatcher = initializeFileSystemWatcher(this);
-    this.initializeAPIMonitor();
+    // FileSystemWatcher and API Monitor initialized lazily
+    this.fileSystemWatcher = undefined;
+    this.apiMonitor = undefined;
   }
 
   /**
@@ -223,13 +224,22 @@ export class AgenticWorkflowManager extends EventEmitter {
   }
 
   /**
+   * Initialize FileSystemWatcher lazily
+   */
+  private getFileSystemWatcher(): FileSystemWatcher {
+    if (!this.fileSystemWatcher) {
+      this.fileSystemWatcher = initializeFileSystemWatcher(this);
+    }
+    return this.fileSystemWatcher;
+  }
+
+  /**
    * Start file system watching
    */
   startFileSystemWatching(paths: string[]): void {
-    if (this.fileSystemWatcher) {
-      for (const path of paths) {
-        this.fileSystemWatcher.startWatching(path);
-      }
+    const watcher = this.getFileSystemWatcher();
+    for (const path of paths) {
+      watcher.startWatching(path);
     }
   }
 
@@ -253,6 +263,16 @@ export class AgenticWorkflowManager extends EventEmitter {
    */
   getFileSystemWatcherStats(): any {
     return this.fileSystemWatcher?.getWatcherStats() || null;
+  }
+
+  /**
+   * Get API Monitor lazily
+   */
+  private getAPIMonitor(): APIResponseMonitor {
+    if (!this.apiMonitor) {
+      this.initializeAPIMonitor();
+    }
+    return this.apiMonitor!;
   }
 
   /**
@@ -443,10 +463,9 @@ export class AgenticWorkflowManager extends EventEmitter {
    * Start API monitoring
    */
   async startAPIMonitoring(): Promise<void> {
-    if (this.apiMonitor) {
-      await this.apiMonitor.start();
-      console.log(chalk.green('✅ API Response Monitor started'));
-    }
+    const monitor = this.getAPIMonitor();
+    await monitor.start();
+    console.log(chalk.green('✅ API Response Monitor started'));
   }
 
   /**
@@ -463,10 +482,9 @@ export class AgenticWorkflowManager extends EventEmitter {
    * Add API endpoint
    */
   addAPIEndpoint(endpoint: APIEndpoint): void {
-    if (this.apiMonitor) {
-      this.apiMonitor.addEndpoint(endpoint);
-      console.log(chalk.green(`✅ Added API endpoint: ${endpoint.name}`));
-    }
+    const monitor = this.getAPIMonitor();
+    monitor.addEndpoint(endpoint);
+    console.log(chalk.green(`✅ Added API endpoint: ${endpoint.name}`));
   }
 
   /**
@@ -483,10 +501,9 @@ export class AgenticWorkflowManager extends EventEmitter {
    * Update API endpoint
    */
   updateAPIEndpoint(endpointId: string, updates: Partial<APIEndpoint>): void {
-    if (this.apiMonitor) {
-      this.apiMonitor.updateEndpoint(endpointId, updates);
-      console.log(chalk.blue(`🔄 Updated API endpoint: ${endpointId}`));
-    }
+    const monitor = this.getAPIMonitor();
+    monitor.updateEndpoint(endpointId, updates);
+    console.log(chalk.blue(`🔄 Updated API endpoint: ${endpointId}`));
   }
 
   /**
@@ -507,9 +524,8 @@ export class AgenticWorkflowManager extends EventEmitter {
    * Manually check API endpoint
    */
   async checkAPIEndpoint(endpointId: string): Promise<void> {
-    if (this.apiMonitor) {
-      await this.apiMonitor.checkEndpoint(endpointId);
-    }
+    const monitor = this.getAPIMonitor();
+    await monitor.checkEndpoint(endpointId);
   }
 
   /**
@@ -705,5 +721,15 @@ export class AgenticWorkflowManager extends EventEmitter {
   }
 }
 
-// Export singleton instance
-export const agenticWorkflowManager = new AgenticWorkflowManager();
+// Singleton instance
+let instance: AgenticWorkflowManager | null = null;
+
+/**
+ * Get singleton instance of AgenticWorkflowManager
+ */
+export function getAgenticWorkflowManager(): AgenticWorkflowManager {
+  if (!instance) {
+    instance = new AgenticWorkflowManager();
+  }
+  return instance;
+}

@@ -61,7 +61,17 @@ export class CachedBeadsClient {
     this.apiKey = apiKey;
     this.workspaceId = workspaceId;
     this.baseUrl = baseUrl;
-    this.cache = new CacheManager(cacheConfig);
+
+    // Check if caching is disabled
+    const disableCache = process.env.DISABLE_CACHE === 'true' ||
+                        process.env.CACHE_ENABLED === 'false' ||
+                        process.env.BEADS_CACHE_ENABLED === 'false';
+
+    if (disableCache) {
+      this.cache = new CacheManager({ backend: 'none' });
+    } else {
+      this.cache = new CacheManager(cacheConfig);
+    }
   }
 
   // Workspace operations

@@ -1,6 +1,6 @@
 {
   "name": "@pwarnock/liaison-coordinator",
-  "version": "0.7.2",
+  "version": "0.1.0",
   "description": "Bidirectional sync plugin for Liaison Toolkit - orchestrates Cody and Beads integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,8 +27,8 @@
     "cache:benchmark": "bun run liaison cache benchmark",
     "test:mutation": "bun run scripts/simple-mutation-tester.ts",
     "test:quality": "bun run test:coverage && bun run test:report",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix",
+    "lint": "oxlint src/**/*.ts --deny-warnings",
+
     "format": "prettier --write src/**/*.ts",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
@@ -91,28 +91,16 @@
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.9",
     "@types/node": "^24.10.2",
-    "@typescript-eslint/eslint-plugin": "^8.49.0",
-    "@typescript-eslint/parser": "^8.49.0",
+
     "@vitest/coverage-v8": "^4.0.15",
-    "eslint": "^9.39.1",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
+
     "prettier": "^3.7.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15",
     "nock": "^13.5.4"
   },
-  "lint-staged": {
-    "*.{js,ts,jsx,tsx}": [
-      "eslint --fix",
-      "prettier --write",
-      "vitest run --bail --findRelatedTests --passWithNoTests"
-    ],
-    "*.{json,md,yml,yaml}": [
-      "prettier --write"
-    ]
-  },
+
   "engines": {
     "node": ">=18.0.0"
   }

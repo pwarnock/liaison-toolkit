@@ -68,7 +68,18 @@ export class CachedGitHubClient {
 
   constructor(token: string, owner: string, repo: string, cacheConfig?: any) {
     this.octokit = new Octokit({ auth: token });
-    this.cache = new CacheManager(cacheConfig);
+
+    // Check if caching is disabled
+    const disableCache = process.env.DISABLE_CACHE === 'true' ||
+                        process.env.CACHE_ENABLED === 'false' ||
+                        process.env.GITHUB_CACHE_ENABLED === 'false';
+
+    if (disableCache) {
+      this.cache = new CacheManager({ backend: 'none' });
+    } else {
+      this.cache = new CacheManager(cacheConfig);
+    }
+
     this.owner = owner;
     this.repo = repo;
   }

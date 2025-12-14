@@ -1,1 +1,2 @@
-Test BD hooks integration
+// Test BD hooks integration
+// Placeholder file for future hooks testing

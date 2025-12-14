@@ -1,6 +1,6 @@
 {
   "name": "@pwarnock/toolkit-core",
-  "version": "0.5.12",
+  "version": "0.1.0",
   "description": "Core library for Liaison Toolkit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
-    "lint": "eslint src/**/*.ts",
+    "lint": "oxlint src/**/*.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -17,7 +17,7 @@
     "semver": "^7.6.2"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+
     "@types/chalk": "^2.2.4",
     "@types/node": "^22.4.0",
     "@types/semver": "^7.5.8",

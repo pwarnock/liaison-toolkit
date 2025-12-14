@@ -231,6 +231,15 @@ export const cacheMiddleware: PluginMiddleware = {
     context: CommandContext,
     next: () => Promise<CommandResult>
   ) => {
+    // Check if caching is disabled
+    const disableCache = process.env.DISABLE_CACHE === 'true' ||
+                        process.env.CACHE_ENABLED === 'false' ||
+                        process.env.LIAISON_CACHE_ENABLED === 'false';
+
+    if (disableCache) {
+      return await next();
+    }
+
     const cacheKey = `${context.command}:${JSON.stringify(context.args)}`;
 
     // Check cache

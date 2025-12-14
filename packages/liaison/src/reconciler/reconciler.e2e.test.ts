@@ -6,11 +6,10 @@
  * Dependencies: bd CLI available, .cody/project/versions/ exists
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { execSync } from 'child_process';
-import { BeadsAdapter } from './adapters/beads-adapter';
 
 // Fix path resolution for tests running from package directory
 const PROJECT_ROOT = process.cwd().endsWith('packages/liaison') 

@@ -19,7 +19,7 @@ interface CacheEntry<T = any> {
 
 // Cache configuration
 interface CacheConfig {
-  backend: "memory" | "disk" | "hybrid";
+  backend: "memory" | "disk" | "hybrid" | "none";
   maxMemoryEntries: number;
   maxDiskSize: number; // in MB
   diskLocation: string;
@@ -46,6 +46,33 @@ interface CacheBackend {
   clear(): Promise<void>;
   keys(): Promise<string[]>;
   size(): Promise<number>;
+}
+
+// No-Op Backend for disabling caching
+class NoOpBackend implements CacheBackend {
+  async get<T>(_key: string): Promise<T | null> {
+    return null;
+  }
+
+  async set<T>(_key: string, _value: T, _ttl?: number): Promise<void> {
+    // Do nothing
+  }
+
+  async delete(_key: string): Promise<void> {
+    // Do nothing
+  }
+
+  async clear(): Promise<void> {
+    // Do nothing
+  }
+
+  async keys(): Promise<string[]> {
+    return [];
+  }
+
+  async size(): Promise<number> {
+    return 0;
+  }
 }
 
 // Memory backend implementation
@@ -399,6 +426,15 @@ export class CacheManager {
 
     const finalConfig = { ...defaultConfig, ...config };
 
+    // Check if caching is disabled via environment variable
+    const disableCache = process.env.DISABLE_CACHE === 'true' ||
+                        process.env.CACHE_ENABLED === 'false' ||
+                        process.env.LIAISON_CACHE_ENABLED === 'false';
+
+    if (disableCache) {
+      finalConfig.backend = "none";
+    }
+
     switch (finalConfig.backend) {
       case "memory":
         this.backend = new MemoryBackend(finalConfig.maxMemoryEntries);
@@ -407,8 +443,11 @@ export class CacheManager {
         this.backend = new DiskBackend(finalConfig);
         break;
       case "hybrid":
-      default:
         this.backend = new HybridBackend(finalConfig);
+        break;
+      case "none":
+      default:
+        this.backend = new NoOpBackend();
         break;
     }
   }

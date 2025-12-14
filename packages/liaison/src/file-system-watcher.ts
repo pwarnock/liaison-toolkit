@@ -166,7 +166,7 @@ export class FileSystemWatcher extends EventEmitter {
   /**
    * Generate task title from file system event
    */
-  private generateTaskTitle(event: FileSystemEvent, workflowId: string): string {
+  private generateTaskTitle(event: FileSystemEvent, _workflowId: string): string {
     const filename = event.path.split('/').pop() || event.path;
     
     switch (event.type) {
@@ -401,7 +401,7 @@ export class FileSystemWatcher extends EventEmitter {
    * Stop all file system watchers
    */
   stopAll(): void {
-    for (const [path, watcher] of this.watchers) {
+    for (const [, watcher] of this.watchers) {
       watcher.close();
     }
     this.watchers.clear();

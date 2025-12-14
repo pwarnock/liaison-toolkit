@@ -9,17 +9,10 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { BeadsAdapter } from '../reconciler/adapters/beads-adapter';
 import type { Task, TaskFilter } from '../reconciler/types';
-import { agenticWorkflowManager } from '../agentic-workflow-manager';
+import { getAgenticWorkflowManager } from '../agentic-workflow-manager';
 import { checkForDuplicates, formatDuplicateMatches } from '../utils/duplicate-checker';
 
-/**
- * Format task for human-readable output
- */
-function formatTask(task: Task): string {
-  const status = task.status;
-  const closed = task.closedAt ? ` [closed ${task.closedAt.toISOString().split('T')[0]}]` : '';
-  return `${chalk.cyan(task.id)} | ${task.title}${closed}`;
-}
+
 
 /**
  * Format table header
@@ -114,6 +107,7 @@ export function createTaskCommand(): Command {
           console.log(`🎯 Ready for agentic workflow integration`);
           
           // Process task event through agentic workflow manager
+          const agenticWorkflowManager = getAgenticWorkflowManager();
           const triggeredWorkflows = await agenticWorkflowManager.processTaskEvent({
             type: 'created',
             taskId: task.id,
@@ -195,7 +189,6 @@ export function createTaskCommand(): Command {
           if (tasks.length === 0) {
             console.log(chalk.yellow('No tasks found'));
             process.exit(0);
-            return;
           }
 
           console.log(chalk.blue(`\n📋 Tasks (${tasks.length})\n`));

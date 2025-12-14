@@ -137,19 +137,41 @@ liaison task create "Security vulnerability" --no-check-duplicates
 ## Build System & Development Workflow
 
 - ✅ **Primary Build Tool**: Use Bun for all builds (`bun run build`)
+- ✅ **Cache Off by Default**: Development uses source files directly (no rebuild needed)
 - ✅ **Clean TypeScript Imports**: No `.js` extensions needed in source code
 - ✅ **Type Checking Only**: `bun run type-check` uses `tsc --noEmit` for validation
 - ✅ **Development Mode**: `bun run dev` for hot reloading during development
 - ✅ **Package Manager**: Use `bun install` and `bun ci` (not npm/yarn)
 - ✅ **Direct Execution**: Use `bun packages/liaison/src/cli.ts` for development
 - ❌ **Deprecated**: Never use `tsc` for compilation, only for type checking
-- ✅ **Smoke Testing**: Run `./scripts/cli_smoke_test.sh` after builds
+- ✅ **Smoke Testing**: Run `./scripts/cli_smoke_test.sh` after changes
+- ✅ **Production Build**: `bun run build` only needed for publishing
 
 ### CLI Execution Patterns
 
 - ✅ **Development**: `bun packages/liaison/src/cli.ts [command]`
 - ✅ **Production**: `node packages/liaison/dist/cli.js [command]`
 - ✅ **Consistency**: All documentation should reference Bun execution pattern
+
+### Development Cache Management
+
+- ✅ **Cache Off by Default**: Source files used directly, no rebuild needed
+- ✅ **Instant Feedback**: Edit source → Test immediately (no `bun run build`)
+- ✅ **Production Build**: `bun run build` only needed for publishing
+- ✅ **Auto-Build**: `prepublishOnly` script builds before publishing
+- ❌ **Manual Rebuilds**: Not needed during development
+
+**Example Development Workflow:**
+```bash
+# Edit source files
+vim packages/opencode_config/src/utils/template-engine.ts
+
+# Test immediately - no rebuild!
+bun packages/liaison/src/cli.ts opencode agent test
+
+# Verify with smoke test
+./scripts/cli_smoke_test.sh
+```
 
 ## Documentation Standards
 

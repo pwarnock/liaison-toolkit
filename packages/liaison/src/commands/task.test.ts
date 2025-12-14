@@ -25,22 +25,22 @@ vi.mock('../reconciler/adapters/beads-adapter', () => {
 });
 
 describe('Task Command', () => {
-  let consoleLogSpy: ReturnType<typeof vi.spyOn>;
-  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
-  let processExitSpy: ReturnType<typeof vi.spyOn>;
+  let _consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+  let _consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  let _processExitSpy = vi.spyOn(process, 'exit');
 
   beforeEach(() => {
     vi.clearAllMocks();
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    processExitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {
+    _consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    _consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    _processExitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {
       throw new Error('process.exit');
     }) as any) as any;
   });
 
   describe('create command', () => {
     it('should create a task with title only', async () => {
-      const command = createTaskCommand();
+      const _command = createTaskCommand();
       const mockTask: Task = {
         id: 'task-123',
         title: 'Test Task',

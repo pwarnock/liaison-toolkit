@@ -53,13 +53,14 @@ export class APIResponseMonitor extends EventEmitter {
   private config: APIResponseMonitorConfig;
   private webhookServer?: any;
   private maxConsecutiveFailures: number;
-  private retryAttempts: number;
+  private _retryAttempts: number;
+
 
   constructor(config: APIResponseMonitorConfig) {
     super();
     this.config = config;
     this.maxConsecutiveFailures = config.maxConsecutiveFailures || 3;
-    this.retryAttempts = config.retryAttempts || 2;
+    this._retryAttempts = 0;
     
     // Initialize endpoints
     config.endpoints.forEach(endpoint => {
@@ -95,7 +96,7 @@ export class APIResponseMonitor extends EventEmitter {
     console.log('🛑 Stopping API Response Monitor...');
     
     // Clear all monitoring intervals
-    for (const [id, interval] of this.intervals) {
+    for (const [, interval] of this.intervals) {
       clearInterval(interval);
     }
     this.intervals.clear();

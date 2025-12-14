@@ -13,9 +13,9 @@ const pluginManager = new UnifiedPluginManager();
 
 // CLI Commands
 program
-  .name('opencode')
-  .description('OpenCode Workflow Kit CLI with plugin architecture')
-  .version('0.5.0');
+  .name('liaison')
+  .description('Liaison CLI - Workflow automation and task management')
+  .version('1.0.0');
 
 // Plugin management commands
 program
@@ -208,34 +208,49 @@ program.addCommand(createTaskCommand());
 import { createWorkflowCommand } from './commands/workflow';
 program.addCommand(createWorkflowCommand());
 
+// OpenCode command
+import { createOpenCodeCommand } from './commands/opencode';
+program.addCommand(createOpenCodeCommand());
+
 // Load built-in plugins
 async function loadBuiltInPlugins() {
   try {
-    // Import and load the Liaison integration plugin
-    const { liaisonPlugin } = await import('./liaison-plugin.js');
-    await pluginManager.loadPlugin(liaisonPlugin);
-    
-    // Add plugin commands to main CLI program
-    const commands = pluginManager.listCommands();
-    commands.forEach(cmd => {
-      program
-        .command(cmd.name)
-        .description(cmd.description)
-        .action(async (args, options) => {
-          try {
-            const result = await pluginManager.executeCommand(cmd.name, args, options);
-            if (result.success) {
-              console.log(chalk.green(`✅ ${cmd.name} completed successfully`));
-            }
-          } catch (error) {
-            console.error(chalk.red(`❌ ${cmd.name} failed: ${error}`));
-            process.exit(1);
-          }
-        });
+    // Set timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Plugin loading timeout')), 10000); // 10 seconds
     });
+
+    // Import and load the Liaison integration plugin with timeout
+    const pluginPromise = (async () => {
+      const { liaisonPlugin } = await import('./liaison-plugin.js');
+      await pluginManager.loadPlugin(liaisonPlugin);
+      
+      // Add plugin commands to main CLI program
+      const commands = pluginManager.listCommands();
+      commands.forEach(cmd => {
+        program
+          .command(cmd.name)
+          .description(cmd.description)
+          .action(async (args, options) => {
+            try {
+              const result = await pluginManager.executeCommand(cmd.name, args, options);
+              if (result.success) {
+                console.log(chalk.green(`✅ ${cmd.name} completed successfully`));
+              }
+            } catch (error) {
+              console.error(chalk.red(`❌ ${cmd.name} failed: ${error}`));
+              process.exit(1);
+            }
+          });
+      });
+    })();
+
+    // Race between plugin loading and timeout
+    await Promise.race([pluginPromise, timeoutPromise]);
     
   } catch (error) {
-    console.warn(chalk.yellow('⚠️  Failed to load built-in plugins:', error));
+    console.warn(chalk.yellow('⚠️  Plugin loading issue:', error instanceof Error ? error.message : String(error)));
+    console.warn(chalk.yellow('Continuing without built-in plugins...'));
   }
 }
 

@@ -1,0 +1,35 @@
+# {{name}}
+
+{{description}}
+
+## Configuration
+
+```json
+{
+  "name": "{{name}}",
+  "description": "{{description}}",
+  "model": "{{model}}",
+  "temperature": {{temperature}},
+  "maxTokens": 4000,
+  "systemPrompt": "You are {{name}}, a specialized AI assistant. {{description}}",
+  "tools": ["webfetch", "bash", "edit", "read"]
+}
+```
+
+## Model Details
+
+- **Model**: {{modelName}}
+- **Context Window**: {{contextWindow}} tokens
+- **Input Cost**: ${{inputCost}}/1K tokens
+- **Output Cost**: ${{outputCost}}/1K tokens
+
+## Usage
+
+This agent is configured to work with OpenCode v2 and provides specialized capabilities for:
+
+{{#if tools}}
+- {{#each tools}}- {{this}}
+{{/each}}
+{{/if}}
+
+Use this agent when you need assistance with {{name}}-related tasks.
