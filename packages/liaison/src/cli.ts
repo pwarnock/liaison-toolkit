@@ -204,6 +204,10 @@ program.addCommand(createReconcileCommand());
 // Task command
 program.addCommand(createTaskCommand());
 
+// Workflow command
+import { createWorkflowCommand } from './commands/workflow';
+program.addCommand(createWorkflowCommand());
+
 // Load built-in plugins
 async function loadBuiltInPlugins() {
   try {
