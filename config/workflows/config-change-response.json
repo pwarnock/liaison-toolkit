@@ -1,0 +1,39 @@
+{
+  "id": "config-change-response",
+  "name": "Configuration Change Response Workflow",
+  "description": "Automated response to configuration file modifications",
+  "triggers": ["file-modified"],
+  "actions": [
+    {
+      "type": "create-task",
+      "title": "Review configuration changes",
+      "description": "Review the recent configuration file modifications",
+      "priority": "critical"
+    },
+    {
+      "type": "validate-config",
+      "description": "Validate configuration file syntax and semantics"
+    },
+    {
+      "type": "test-config",
+      "description": "Test application with new configuration"
+    }
+  ],
+  "subtasks": [
+    {
+      "title": "Check for security implications",
+      "description": "Verify configuration changes don't introduce security vulnerabilities",
+      "priority": "critical"
+    },
+    {
+      "title": "Validate environment compatibility",
+      "description": "Ensure configuration works across different environments",
+      "priority": "high"
+    },
+    {
+      "title": "Update configuration documentation",
+      "description": "Update documentation to reflect configuration changes",
+      "priority": "medium"
+    }
+  ]
+}

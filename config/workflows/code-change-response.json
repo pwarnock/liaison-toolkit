@@ -1,0 +1,39 @@
+{
+  "id": "code-change-response",
+  "name": "Code Change Response Workflow",
+  "description": "Automated response to source code modifications",
+  "triggers": ["file-modified"],
+  "actions": [
+    {
+      "type": "create-task",
+      "title": "Review code changes",
+      "description": "Review the recent source code modifications",
+      "priority": "high"
+    },
+    {
+      "type": "run-tests",
+      "description": "Run relevant tests for modified code"
+    },
+    {
+      "type": "type-check",
+      "description": "Run TypeScript type checking"
+    }
+  ],
+  "subtasks": [
+    {
+      "title": "Check for breaking changes",
+      "description": "Identify potential breaking changes in the code",
+      "priority": "high"
+    },
+    {
+      "title": "Validate code quality",
+      "description": "Run linting and formatting checks",
+      "priority": "medium"
+    },
+    {
+      "title": "Update documentation if needed",
+      "description": "Check if documentation needs updates for the code changes",
+      "priority": "low"
+    }
+  ]
+}

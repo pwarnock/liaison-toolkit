@@ -9,7 +9,8 @@ import { BeadsAdapter } from './reconciler/adapters/beads-adapter';
 import type { Task, CreateTaskInput } from './reconciler/types';
 import { TaskStatus } from './reconciler/types';
 import { spawn } from 'child_process';
-import { writeFileSync, appendFileSync } from 'fs';
+import { appendFileSync } from 'fs';
+import { initializeFileSystemWatcher, FileSystemWatcher } from './file-system-watcher';
 
 export interface TaskEvent {
   type: 'created' | 'updated' | 'closed';
@@ -29,11 +30,13 @@ export interface WorkflowTrigger {
 export class AgenticWorkflowManager extends EventEmitter {
   private triggers: Map<string, WorkflowTrigger[]> = new Map();
   private eventHistory: TaskEvent[] = [];
+  private fileSystemWatcher?: FileSystemWatcher;
 
   constructor() {
     super();
     this.setupDefaultTriggers();
     this.setupWorkflowCompletionListener();
+    this.fileSystemWatcher = initializeFileSystemWatcher(this);
   }
 
   /**
@@ -200,6 +203,39 @@ export class AgenticWorkflowManager extends EventEmitter {
       console.error(chalk.red(`Failed to update task: ${error}`));
       throw error;
     }
+  }
+
+  /**
+   * Start file system watching
+   */
+  startFileSystemWatching(paths: string[]): void {
+    if (this.fileSystemWatcher) {
+      for (const path of paths) {
+        this.fileSystemWatcher.startWatching(path);
+      }
+    }
+  }
+
+  /**
+   * Stop file system watching
+   */
+  stopFileSystemWatching(paths?: string[]): void {
+    if (this.fileSystemWatcher) {
+      if (paths) {
+        for (const path of paths) {
+          this.fileSystemWatcher.stopWatching(path);
+        }
+      } else {
+        this.fileSystemWatcher.stopAll();
+      }
+    }
+  }
+
+  /**
+   * Get file system watcher statistics
+   */
+  getFileSystemWatcherStats(): any {
+    return this.fileSystemWatcher?.getWatcherStats() || null;
   }
 
   /**

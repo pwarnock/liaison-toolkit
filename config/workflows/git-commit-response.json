@@ -1,0 +1,39 @@
+{
+  "id": "git-commit-response",
+  "name": "Git Commit Response Workflow",
+  "description": "Automated response to git commits for tracking and validation",
+  "triggers": ["git-commit"],
+  "actions": [
+    {
+      "type": "create-task",
+      "title": "Review git commit changes",
+      "description": "Review the recent git commit and validate changes",
+      "priority": "medium"
+    },
+    {
+      "type": "run-tests",
+      "description": "Run test suite to validate commit doesn't break functionality"
+    },
+    {
+      "type": "check-build",
+      "description": "Verify build system still works after commit"
+    }
+  ],
+  "subtasks": [
+    {
+      "title": "Validate commit message format",
+      "description": "Ensure commit message follows project conventions",
+      "priority": "low"
+    },
+    {
+      "title": "Check for sensitive data exposure",
+      "description": "Verify no secrets or sensitive data committed",
+      "priority": "high"
+    },
+    {
+      "title": "Run code quality checks",
+      "description": "Execute linting and formatting validation",
+      "priority": "medium"
+    }
+  ]
+}

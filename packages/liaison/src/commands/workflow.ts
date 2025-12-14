@@ -344,12 +344,90 @@ export function createWorkflowCommand(): Command {
         console.log(`    ${type}: ${count}`);
       });
       
-      console.log(chalk.bold('\nRecent Events:'));
+console.log(chalk.bold('\nRecent Events:'));
       stats.recentEvents.forEach((event: any, index: number) => {
         console.log(`  ${index + 1}. ${event.type.toUpperCase()} - ${event.taskId} (${event.timestamp.toISOString()})`);
       });
+
+      // Show file system watcher stats
+      const fsStats = agenticWorkflowManager.getFileSystemWatcherStats();
+      if (fsStats) {
+        console.log(chalk.bold('\n📁 File System Watcher:'));
+        console.log(`  Active Watchers: ${fsStats.activeWatchers}`);
+        console.log(`  Watched Paths: ${fsStats.watchedPaths.join(', ')}`);
+        console.log(`  Last Git Commit: ${fsStats.lastGitCommit || 'None'}`);
+        console.log(`  File System Triggers: ${fsStats.totalTriggers}`);
+      }
+    });
+
+  // liaison workflow watch
+  command
+    .command('watch <path>')
+    .description('Start watching file system path for changes')
+    .option('--stop', 'Stop watching the specified path')
+    .action(async (path: string, options) => {
+      if (options.stop) {
+        const spinner = ora(`Stopping file system watcher for ${path}...`).start();
+        try {
+          agenticWorkflowManager.stopFileSystemWatching([path]);
+          spinner.succeed(chalk.green(`Stopped watching ${path}`));
+        } catch (error) {
+          spinner.fail(chalk.red(`Failed to stop watching: ${error}`));
+          process.exit(1);
+        }
+      } else {
+        const spinner = ora(`Starting file system watcher for ${path}...`).start();
+        try {
+          agenticWorkflowManager.startFileSystemWatching([path]);
+          spinner.succeed(chalk.green(`Now watching ${path} for changes`));
+          console.log(chalk.blue('📁 File system triggers are now active'));
+          console.log(chalk.yellow('Press Ctrl+C to stop watching'));
+          
+          // Keep process alive to continue watching
+          process.on('SIGINT', () => {
+            console.log(chalk.blue('\n📁 Stopping file system watchers...'));
+            agenticWorkflowManager.stopFileSystemWatching();
+            process.exit(0);
+          });
+          
+          // Prevent process from exiting
+          setInterval(() => {}, 1000);
+        } catch (error) {
+          spinner.fail(chalk.red(`Failed to start watching: ${error}`));
+          process.exit(1);
+        }
+      }
+    });
+
+  // liaison workflow watch-status
+  command
+    .command('watch-status')
+    .description('Show file system watcher status')
+    .action(async () => {
+      console.log(chalk.blue('📁 File System Watcher Status:\n'));
       
-      console.log(chalk.green('\n✅ Agentic workflow triggers are active and monitoring task events'));
+      const stats = agenticWorkflowManager.getFileSystemWatcherStats();
+      
+      if (!stats) {
+        console.log(chalk.yellow('File system watcher not initialized'));
+        return;
+      }
+      
+      console.log(chalk.bold('Watcher Statistics:'));
+      console.log(`  Total Triggers: ${stats.totalTriggers}`);
+      console.log(`  Active Watchers: ${stats.activeWatchers}`);
+      console.log(`  Watched Paths: ${stats.watchedPaths.join(', ') || 'None'}`);
+      console.log(`  Last Git Commit: ${stats.lastGitCommit || 'None'}`);
+      
+      console.log(chalk.bold('\nTriggers by Type:'));
+      Object.entries(stats.triggersByType).forEach(([type, count]) => {
+        console.log(`  ${type}: ${count}`);
+      });
+      
+      console.log(chalk.bold('\nRecent File System Events:'));
+      stats.recentEvents.forEach((event: any, index: number) => {
+        console.log(`  ${index + 1}. ${event.type.toUpperCase()} - ${event.path} (${event.timestamp.toISOString()})`);
+      });
     });
 
   return command;
