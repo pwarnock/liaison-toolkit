@@ -1,0 +1,1 @@
+Test BD hooks integration
