@@ -1,0 +1,35 @@
+{
+  "id": "stability-remediation",
+  "name": "Stability Remediation Workflow",
+  "description": "Automated response to system stability issues including performance, reliability, and availability problems",
+  "created_at": "2025-12-14T00:00:00Z",
+  "triggers": ["stability", "performance", "reliability", "availability"],
+  "actions": ["analyze", "remediate", "verify", "monitor"],
+  "template": "stability",
+  "subtasks": [
+    {
+      "title": "Analyze stability issue",
+      "description": "Investigate root cause of stability problem including performance metrics, error logs, and system resources",
+      "priority": "high",
+      "workflowTrigger": "investigation"
+    },
+    {
+      "title": "Implement remediation",
+      "description": "Apply appropriate fix for stability issue based on analysis findings",
+      "priority": "high",
+      "workflowTrigger": "development"
+    },
+    {
+      "title": "Verify fix effectiveness",
+      "description": "Test that stability issue is resolved and system performance meets requirements",
+      "priority": "medium",
+      "workflowTrigger": "verification"
+    },
+    {
+      "title": "Monitor system stability",
+      "description": "Continuously monitor system to ensure stability issue does not recur",
+      "priority": "low",
+      "workflowTrigger": "monitoring"
+    }
+  ]
+}

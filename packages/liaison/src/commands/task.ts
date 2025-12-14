@@ -140,6 +140,7 @@ export function createTaskCommand(): Command {
             console.log(`Description: ${task.description}`);
           }
         }
+        process.exit(0);
       } catch (error) {
         spinner.fail(chalk.red(`Failed to create task: ${error}`));
         process.exit(1);
@@ -178,11 +179,22 @@ export function createTaskCommand(): Command {
 
         if (options.json) {
           spinner.stop();
-          console.log(JSON.stringify(tasks, null, 2));
+          // Stream JSON to avoid buffer issues
+          process.stdout.write('[\n');
+          tasks.forEach((task, index) => {
+            process.stdout.write(JSON.stringify(task, null, 2));
+            if (index < tasks.length - 1) {
+              process.stdout.write(',\n');
+            } else {
+              process.stdout.write('\n');
+            }
+          });
+          process.stdout.write(']\n');
         } else {
           spinner.stop();
           if (tasks.length === 0) {
             console.log(chalk.yellow('No tasks found'));
+            process.exit(0);
             return;
           }
 
@@ -191,6 +203,7 @@ export function createTaskCommand(): Command {
           tasks.forEach((task) => console.log(formatTaskRow(task)));
           console.log();
         }
+        process.exit(0);
       } catch (error) {
         spinner.fail(chalk.red(`Failed to list tasks: ${error}`));
         process.exit(1);
@@ -241,6 +254,7 @@ export function createTaskCommand(): Command {
           }
           console.log();
         }
+        process.exit(0);
       } catch (error) {
         spinner.fail(chalk.red(`Failed to get task: ${error}`));
         process.exit(1);
@@ -252,6 +266,7 @@ export function createTaskCommand(): Command {
     .command('update <id>')
     .description('Update task status')
     .option('--status <status>', 'New status (open, closed, deleted)', 'closed')
+    .option('--notes <text>', 'Additional notes')
     .option('--json', 'Output as JSON')
     .action(async (id: string, options) => {
       const spinner = ora(`Updating task ${id}...`).start();
@@ -266,7 +281,7 @@ export function createTaskCommand(): Command {
           process.exit(1);
         }
 
-        const task = await adapter.updateTaskStatus(id, options.status);
+        const task = await adapter.updateTaskStatus(id, options.status, options.notes);
 
         if (options.json) {
           spinner.stop();
@@ -277,6 +292,7 @@ export function createTaskCommand(): Command {
           console.log(`Status: ${task.status}`);
           console.log();
         }
+        process.exit(0);
       } catch (error) {
         spinner.fail(chalk.red(`Failed to update task: ${error}`));
         process.exit(1);

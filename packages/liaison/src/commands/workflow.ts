@@ -113,7 +113,7 @@ function getSubtaskDefinitions(workflowId: string): Array<{
     'documentation-update': [
       {
         title: 'Update documentation content',
-        description: 'Revise the relevant documentation sections',
+        description: 'Revise relevant documentation sections',
         priority: 'medium',
         workflowTrigger: 'content-update'
       },
@@ -125,9 +125,35 @@ function getSubtaskDefinitions(workflowId: string): Array<{
       },
       {
         title: 'Publish updated documentation',
-        description: 'Release the updated documentation to users',
+        description: 'Release updated documentation to users',
         priority: 'low',
         workflowTrigger: 'publication'
+      }
+    ],
+    'stability-remediation': [
+      {
+        title: 'Analyze stability issue',
+        description: 'Investigate root cause of stability problem including performance metrics, error logs, and system resources',
+        priority: 'high',
+        workflowTrigger: 'investigation'
+      },
+      {
+        title: 'Implement remediation',
+        description: 'Apply appropriate fix for stability issue based on analysis findings',
+        priority: 'high',
+        workflowTrigger: 'development'
+      },
+      {
+        title: 'Verify fix effectiveness',
+        description: 'Test that stability issue is resolved and system performance meets requirements',
+        priority: 'medium',
+        workflowTrigger: 'verification'
+      },
+      {
+        title: 'Monitor system stability',
+        description: 'Continuously monitor system to ensure stability issue does not recur',
+        priority: 'low',
+        workflowTrigger: 'monitoring'
       }
     ]
   };

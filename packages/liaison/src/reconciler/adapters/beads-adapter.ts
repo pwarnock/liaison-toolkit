@@ -137,14 +137,17 @@ export class BeadsAdapter implements TaskBackendAdapter {
     }
   }
 
-  async updateTaskStatus(id: string, status: TaskStatus): Promise<Task> {
+  async updateTaskStatus(id: string, status: TaskStatus, notes?: string): Promise<Task> {
     try {
+      const args = ['update', id, `--status=${status}`];
+      if (notes) {
+        args.push(`--notes=${notes}`);
+      }
+      args.push('--json');
+
       const { stdout } = await spawnPromise(this.commandPrefix[0], [
         ...this.commandPrefix.slice(1),
-        'update',
-        id,
-        `--status=${status}`,
-        '--json',
+        ...args,
       ]);
       const tasks = JSON.parse(stdout);
       // bd returns array for update command
@@ -189,7 +192,8 @@ export class BeadsAdapter implements TaskBackendAdapter {
    * Extract metadata from task description
    */
   private extractMetadata(description: string): Record<string, any> {
-    const metadataMatch = description.match(/<!-- METADATA: (.+?) -->/);
+    // Use 's' flag to match across newlines
+    const metadataMatch = description.match(/<!-- METADATA: ([\s\S]*?) -->/);
     if (metadataMatch) {
       try {
         return JSON.parse(metadataMatch[1]);
@@ -241,7 +245,8 @@ export class BeadsAdapter implements TaskBackendAdapter {
 
   private parseTask(data: BeadsTaskData): Task {
     const metadata = this.extractMetadata(data.description || '');
-    const cleanDescription = data.description?.replace(/<!-- METADATA: .+? -->\n?/, '').trim();
+    // Use 's' flag for multiline matching, properly clean metadata comment
+    const cleanDescription = data.description?.replace(/<!-- METADATA: [\s\S]*? -->\s*/, '').trim() || '';
     
     return {
       id: data.id,

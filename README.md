@@ -136,6 +136,31 @@ just opencode-test   # Test opencode-config
    ./scripts/bd-wrapper.sh ready
    ```
 
+## 🤖 Agentic Workflows
+
+Liaison features intelligent task-driven workflows that automatically execute based on task properties.
+
+### Quick Workflow Example
+```bash
+# Create task → automatic workflow execution
+liaison task create "Fix critical security bug" --priority critical
+# → Security response workflow runs automatically
+# → Creates investigation, patch, verification subtasks
+# → Tracks progress and generates commits
+```
+
+### The 6-Step Workflow Order
+1. **Create ONE Task** - Single focused task per issue
+2. **System Triggers Workflow** - Automatic workflow selection
+3. **Workflow Creates Subtasks** - Automatic breakdown into focused work
+4. **Workflows Execute Fixes** - Specialized workflows for each subtask
+5. **Progress Tracked Automatically** - Real-time status updates
+6. **Git Commits Triggered** - Automatic version control integration
+
+### Complete Workflow Documentation
+For detailed workflow order, examples, and troubleshooting:
+→ See `docs/workflows/task-driven-workflow-order.md`
+
 ## 🧪 Comprehensive Testing
 
 ### Test Categories

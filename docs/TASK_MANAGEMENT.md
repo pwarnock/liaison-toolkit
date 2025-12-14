@@ -189,6 +189,49 @@ liaison task blocks bd-123
 liaison task depends-on bd-123
 ```
 
+## 🔄 Workflow Integration
+
+### Automatic Workflow Triggering
+When you create tasks using `liaison task create`, the system automatically:
+
+1. **Evaluates Task Properties**: Priority, content, tags, auto-trigger flag
+2. **Selects Appropriate Workflow**: Based on trigger conditions
+3. **Executes Workflow Automatically**: No manual intervention required
+4. **Creates Subtasks**: Workflow generates focused subtasks
+5. **Tracks Progress**: Automatic status updates throughout execution
+6. **Generates Commits**: When workflows complete successfully
+
+### Task Creation Best Practices
+- **Create ONE focused task** per issue
+- **Use clear, descriptive titles** with relevant keywords
+- **Set appropriate priority** for automatic triggering
+- **Let workflows create subtasks** - don't create them manually
+
+### Workflow Trigger Examples
+```bash
+# Security/Critical Tasks → security-response workflow
+liaison task create "Security vulnerability found" --priority critical
+
+# Production Bugs → bug-fix workflow
+liaison task create "Fix production bug" --auto-trigger "bug-fix"
+
+# High Priority Tasks → high-priority-response workflow
+liaison task create "Urgent issue" --priority high
+
+# Documentation Tasks → documentation-update workflow
+liaison task create "Update API docs" --auto-trigger "documentation-update"
+```
+
+### Complete Workflow Documentation
+For detailed workflow order, examples, and troubleshooting:
+→ See `docs/workflows/task-driven-workflow-order.md`
+
+This guide includes:
+- Complete 6-step workflow order
+- Real-world examples for each workflow type
+- Troubleshooting common issues
+- Best practices for task creation
+
 ## 🏷️ Label Management
 
 ### Create Labels

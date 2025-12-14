@@ -1,0 +1,47 @@
+{
+  "id": "feature-development",
+  "name": "Feature Development Workflow",
+  "description": "Automated workflow for developing new features from conception to deployment",
+  "created_at": "2025-12-14T00:00:00Z",
+  "triggers": ["feature", "enhancement", "development", "implementation"],
+  "actions": ["design", "implement", "test", "deploy"],
+  "template": "feature",
+  "subtasks": [
+    {
+      "title": "Design feature architecture",
+      "description": "Create technical design, define requirements, and plan implementation approach",
+      "priority": "high",
+      "workflowTrigger": "design"
+    },
+    {
+      "title": "Implement core functionality",
+      "description": "Develop the main feature components and business logic",
+      "priority": "high",
+      "workflowTrigger": "development"
+    },
+    {
+      "title": "Write comprehensive tests",
+      "description": "Create unit tests, integration tests, and end-to-end tests for the feature",
+      "priority": "medium",
+      "workflowTrigger": "testing"
+    },
+    {
+      "title": "Perform code review",
+      "description": "Review code quality, security, and adherence to coding standards",
+      "priority": "medium",
+      "workflowTrigger": "review"
+    },
+    {
+      "title": "Deploy feature to production",
+      "description": "Release feature to production environment with appropriate monitoring",
+      "priority": "low",
+      "workflowTrigger": "deployment"
+    },
+    {
+      "title": "Monitor feature performance",
+      "description": "Track feature usage and performance to ensure successful deployment",
+      "priority": "low",
+      "workflowTrigger": "monitoring"
+    }
+  ]
+}

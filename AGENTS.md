@@ -402,16 +402,29 @@ liaison task analytics --period "7d"
 - ✅ Closed-loop system where work creates more work
 - ✅ True agentic automation platform achieved
 
+## 📚 Complete Workflow Documentation
+
+For comprehensive task-driven workflow order documentation, see:
+→ `docs/workflows/task-driven-workflow-order.md`
+
+This guide includes:
+- Complete 6-step workflow order
+- Real-world examples for each workflow type
+- Troubleshooting common issues
+- Best practices for task creation
+- Workflow configuration examples
+
 ## How Future Sessions Should Start
 
 New agents should:
 
 1. Read this file first
-2. Read the task at hand
-3. Ask clarifying questions
-4. Present plan
-5. Wait for approval
-6. Execute only after approval
+2. Read `docs/workflows/task-driven-workflow-order.md` for workflow guidance
+3. Read the task at hand
+4. Ask clarifying questions
+5. Present plan
+6. Wait for approval
+7. Execute only after approval
 
 ---
 
@@ -419,3 +432,4 @@ New agents should:
 **Golden path enforced**: Ask → Plan → Approve → Execute (never: See → Assume → Execute)
 **Build system**: Bun-native with TypeScript support
 **Agentic workflows**: Task-driven automation with closed-loop execution
+**Workflow documentation**: Complete 6-step order guide available

@@ -1,0 +1,41 @@
+{
+  "id": "customer-response",
+  "name": "Customer Response Workflow",
+  "description": "Automated response to customer inquiries, support requests, and service issues",
+  "created_at": "2025-12-14T00:00:00Z",
+  "triggers": ["customer", "support", "inquiry", "service"],
+  "actions": ["acknowledge", "investigate", "respond", "escalate"],
+  "template": "customer",
+  "subtasks": [
+    {
+      "title": "Acknowledge customer request",
+      "description": "Send immediate confirmation to customer that their request has been received and is being processed",
+      "priority": "high",
+      "workflowTrigger": "notification"
+    },
+    {
+      "title": "Investigate customer issue",
+      "description": "Analyze the customer's problem, gather relevant information, and identify root cause",
+      "priority": "high",
+      "workflowTrigger": "investigation"
+    },
+    {
+      "title": "Develop response solution",
+      "description": "Create appropriate response or solution based on investigation findings",
+      "priority": "medium",
+      "workflowTrigger": "development"
+    },
+    {
+      "title": "Respond to customer",
+      "description": "Provide comprehensive response to customer with solution or next steps",
+      "priority": "medium",
+      "workflowTrigger": "communication"
+    },
+    {
+      "title": "Follow up for satisfaction",
+      "description": "Check back with customer to ensure issue is resolved and they are satisfied",
+      "priority": "low",
+      "workflowTrigger": "monitoring"
+    }
+  ]
+}

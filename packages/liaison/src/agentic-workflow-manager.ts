@@ -574,6 +574,20 @@ export class AgenticWorkflowManager extends EventEmitter {
       priority: 4
     });
 
+    // Stability tasks trigger
+    this.registerTrigger('created', {
+      condition: (task) => 
+        task.title.toLowerCase().includes('stability') ||
+        task.title.toLowerCase().includes('performance') ||
+        task.title.toLowerCase().includes('reliability') ||
+        task.title.toLowerCase().includes('memory') ||
+        task.title.toLowerCase().includes('cpu') ||
+        task.title.toLowerCase().includes('resource'),
+      workflowId: 'stability-remediation',
+      description: 'Stability issue detected',
+      priority: 5
+    });
+
     console.log(chalk.green(`✅ Setup ${this.triggers.size} default workflow triggers`));
   }
 
