@@ -8,10 +8,10 @@
     "Completion rate discrepancy (Cody 33% vs Beads 82%)",
     "Missing Beads data in Cody cleanup summary"
   ],
-  "last_refresh": "2025-12-13T23:03:00.000Z",
-  "refresh_count": 15,
+  "last_refresh": "2025-12-14T08:35:57.161Z",
+  "refresh_count": 20,
   "last_refresh_success": true,
-  "last_refresh_message": "BeadsAdapter fix completed successfully",
+  "last_refresh_message": "Sync completed successfully",
   "reconciliation_summary": {
     "beads_issues_analyzed": 146,
     "cody_tasks_analyzed": 24,

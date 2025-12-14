@@ -271,10 +271,21 @@ export class ConfigManager implements IConfigManager {
     try {
       // Test GitHub connection
       if (config.github?.token && config.github?.owner && config.github?.repo) {
+        console.log(
+          'DEBUG: GitHub config token present, owner:',
+          config.github.owner,
+          'repo:',
+          config.github.repo
+        );
+        console.log('DEBUG: config.github.apiUrl:', config.github.apiUrl);
         const { Octokit } = await import('@octokit/rest');
         const octokitConfig: any = { auth: config.github.token };
         if (config.github.apiUrl) {
           octokitConfig.baseUrl = config.github.apiUrl;
+          console.log(
+              'DEBUG: octokitConfig.baseUrl set to:',
+              octokitConfig.baseUrl
+            );
         }
         const octokit = new Octokit(octokitConfig);
 

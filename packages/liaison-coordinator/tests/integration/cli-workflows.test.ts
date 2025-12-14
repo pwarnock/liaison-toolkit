@@ -16,8 +16,7 @@ import { exec } from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
-import * as http from 'http';
-import { AddressInfo } from 'net';
+import nock from 'nock';
 
 function execWithInput(
   command: string,
@@ -47,8 +46,7 @@ describe('Integration Tests', () => {
   let originalCwd: string;
   let configPath: string;
   let binPath: string;
-  let mockServer: http.Server;
-  let mockApiUrl: string;
+
   let beadsProjectPath = process.env.BEADS_PROJECT_PATH ?? './beads-project';
   let beadsProjectDirAbsolute: string;
 
@@ -70,46 +68,12 @@ describe('Integration Tests', () => {
     // Create test project structure
     await fs.mkdir(path.join(testProjectDir, '.cody'), { recursive: true });
     await fs.mkdir(path.join(testProjectDir, 'plugins'), { recursive: true });
-
-    // Setup mock server
-    mockServer = http.createServer((req, res) => {
-      // Basic mock response for repo info - handle both with and without /api prefix
-      if (
-        (req.url === '/repos/test-owner/test-repo' ||
-          req.url === '/api/repos/test-owner/test-repo') &&
-        req.method === 'GET'
-      ) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            name: 'test-repo',
-            owner: { login: 'test-owner' },
-            default_branch: 'main',
-          })
-        );
-        return;
-      }
-      // Log unexpected requests for debugging
-      console.log('Mock server received:', req.method, req.url);
-      // Fallback
-      res.writeHead(404);
-      res.end(JSON.stringify({ error: 'Not found' }));
-    });
-
-    await new Promise<void>((resolve) => {
-      mockServer.listen(0, () => {
-        const address = mockServer.address() as AddressInfo;
-        mockApiUrl = `http://localhost:${address.port}`;
-        // Override environment variable to ensure CLI uses mock server
-        process.env.GITHUB_API_URL = mockApiUrl;
-        resolve();
-      });
-    });
   });
 
   afterAll(async () => {
-    mockServer.close();
     delete process.env.GITHUB_API_URL;
+    delete process.env.GITHUB_OWNER;
+    delete process.env.GITHUB_TOKEN;
     delete process.env.BEADS_SKIP_AVAILABILITY_CHECK;
     delete process.env.SYNC_SIMULATE;
     // process.chdir is not supported in workers, and we don't use it anymore
@@ -118,6 +82,42 @@ describe('Integration Tests', () => {
 
   beforeEach(async () => {
     // Reset test environment
+    // Clear environment variables that might override config
+    delete process.env.GITHUB_OWNER;
+    delete process.env.GITHUB_TOKEN;
+    delete process.env.GITHUB_REPO;
+    delete process.env.GITHUB_API_URL;
+    
+    // Create a simple mock HTTP server for GitHub API
+    const http = await import('http');
+    const mockServer = http.createServer((req, res) => {
+      res.setHeader('Content-Type', 'application/json');
+      
+      if (req.url === '/repos/test-owner/test-repo' && req.method === 'GET') {
+        res.writeHead(200);
+        res.end(JSON.stringify({
+          name: 'test-repo',
+          owner: { login: 'test-owner' },
+          default_branch: 'main',
+        }));
+      } else {
+        res.writeHead(404);
+        res.end(JSON.stringify({ message: 'Not Found' }));
+      }
+    });
+    
+    // Start server on a random available port
+    await new Promise<void>((resolve) => {
+      mockServer.listen(0, () => {
+        const port = (mockServer.address() as any).port;
+        process.env.GITHUB_API_URL = `http://localhost:${port}`;
+        resolve();
+      });
+    });
+    
+    // Store server reference for cleanup
+    (global as any).__mockServer = mockServer;
+    
     await fs.mkdir(beadsProjectDirAbsolute, { recursive: true });
     await fs.writeFile(
       configPath,
@@ -128,7 +128,7 @@ describe('Integration Tests', () => {
             owner: 'test-owner',
             repo: 'test-repo',
             token: 'test-token',
-            apiUrl: mockApiUrl,
+            apiUrl: process.env.GITHUB_API_URL, // Use mock server URL
           },
           beads: {
             projectPath: beadsProjectPath,
@@ -142,6 +142,20 @@ describe('Integration Tests', () => {
         2
       )
     );
+  });
+
+  afterEach(async () => {
+    // Cleanup mock server
+    const mockServer = (global as any).__mockServer;
+    if (mockServer) {
+      await new Promise<void>((resolve) => {
+        mockServer.close(() => resolve());
+      });
+      delete (global as any).__mockServer;
+    }
+    
+    // Clear environment variables
+    delete process.env.GITHUB_API_URL;
   });
 
   describe('CLI Integration', () => {
@@ -711,7 +725,7 @@ describe('Integration Tests', () => {
       await fs.writeFile(configPath, JSON.stringify(mixedPathConfig, null, 2));
 
       const { stdout: result } = await execWithInput(
-        `node \"${binPath}\" config test`,
+        `node \"${binPath}\" config test --config \"${configPath}\"`,
         {
           cwd: testProjectDir,
           encoding: 'utf8',

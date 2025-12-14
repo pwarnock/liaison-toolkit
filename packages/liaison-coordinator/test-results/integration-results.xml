@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="27" failures="1" errors="0" time="2.267248317">
+    <testsuite name="tests/integration/cli-workflows.test.ts" timestamp="2025-12-14T08:47:40.546Z" hostname="MSI" tests="22" failures="1" errors="0" skipped="0" time="2.248260223">
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; CLI Integration &gt; should initialize new project" time="0.390304746">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; CLI Integration &gt; should validate configuration" time="1.835144957">
+            <failure message="expected &apos;🧪 Testing configuration...\nDEBUG: G…&apos; to contain &apos;✅ GitHub connection: OK&apos;" type="AssertionError">
+AssertionError: expected &apos;🧪 Testing configuration...\nDEBUG: G…&apos; to contain &apos;✅ GitHub connection: OK&apos;
+
+- Expected
++ Received
+
+- ✅ GitHub connection: OK
++ 🧪 Testing configuration...
++ DEBUG: GitHub config token present, owner: pwarnock repo: test-repo
++ DEBUG: config.github.apiUrl: https://api.github.com
++ DEBUG: octokitConfig.baseUrl set to: https://api.github.com
++ ❌ GitHub connection: FAILED
++ ✅ Beads connection: OK
++
+
+ ❯ tests/integration/cli-workflows.test.ts:156:22
+            </failure>
+            <failure message="expected &apos;🧪 Testing configuration...\nDEBUG: G…&apos; to contain &apos;✅ GitHub connection: OK&apos;" type="AssertionError">
+AssertionError: expected &apos;🧪 Testing configuration...\nDEBUG: G…&apos; to contain &apos;✅ GitHub connection: OK&apos;
+
+- Expected
++ Received
+
+- ✅ GitHub connection: OK
++ 🧪 Testing configuration...
++ DEBUG: GitHub config token present, owner: pwarnock repo: test-repo
++ DEBUG: config.github.apiUrl: https://api.github.com
++ DEBUG: octokitConfig.baseUrl set to: https://api.github.com
++ ❌ GitHub connection: FAILED
++ ✅ Beads connection: OK
++
+
+ ❯ tests/integration/cli-workflows.test.ts:156:22
+            </failure>
+            <failure message="expected &apos;🧪 Testing configuration...\nDEBUG: G…&apos; to contain &apos;✅ GitHub connection: OK&apos;" type="AssertionError">
+AssertionError: expected &apos;🧪 Testing configuration...\nDEBUG: G…&apos; to contain &apos;✅ GitHub connection: OK&apos;
+
+- Expected
++ Received
+
+- ✅ GitHub connection: OK
++ 🧪 Testing configuration...
++ DEBUG: GitHub config token present, owner: pwarnock repo: test-repo
++ DEBUG: config.github.apiUrl: https://api.github.com
++ DEBUG: octokitConfig.baseUrl set to: https://api.github.com
++ ❌ GitHub connection: FAILED
++ ✅ Beads connection: OK
++
+
+ ❯ tests/integration/cli-workflows.test.ts:156:22
+            </failure>
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; CLI Integration &gt; should show help with enhanced features and validate output format" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; CLI Integration &gt; should handle sync commands" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Plugin System Integration &gt; should install and manage plugins" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Plugin System Integration &gt; should list installed plugins for inspection" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Workflow Automation Integration &gt; should execute workflow triggers" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Workflow Automation Integration &gt; should handle workflow conditions" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Template System Integration &gt; should apply project templates" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Template System Integration &gt; should create a custom template definition" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Error Recovery Integration &gt; should handle sync conflicts gracefully" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Error Recovery Integration &gt; should recover from network failures" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Performance Integration &gt; should handle large sync operations efficiently" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Performance Integration &gt; should support repeated sync invocations for monitoring" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Security Integration &gt; should enforce plugin sandboxing" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Security Integration &gt; should validate digital signatures" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Cross-Platform Integration &gt; should work on different operating systems" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Cross-Platform Integration &gt; should handle path separators correctly" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Data Integrity Integration &gt; should verify data integrity during sync" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Data Integrity Integration &gt; should detect and report corruption" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Real-world Scenarios &gt; should handle typical development workflow" time="0">
+        </testcase>
+        <testcase classname="tests/integration/cli-workflows.test.ts" name="Integration Tests &gt; Real-world Scenarios &gt; should handle error recovery workflow" time="0">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/integration/github-api.test.ts" timestamp="2025-12-14T08:47:40.553Z" hostname="MSI" tests="5" failures="0" errors="0" skipped="0" time="0.018988094">
+        <testcase classname="tests/integration/github-api.test.ts" name="GitHub API Integration Tests &gt; API Mocking &gt; should mock GitHub API responses" time="0.003117532">
+        </testcase>
+        <testcase classname="tests/integration/github-api.test.ts" name="GitHub API Integration Tests &gt; API Mocking &gt; should handle API error responses" time="0.000724248">
+        </testcase>
+        <testcase classname="tests/integration/github-api.test.ts" name="GitHub API Integration Tests &gt; Environment Setup &gt; should have test environment variables" time="0.000266034">
+        </testcase>
+        <testcase classname="tests/integration/github-api.test.ts" name="GitHub API Integration Tests &gt; Environment Setup &gt; should have test data directory" time="0.000294341">
+        </testcase>
+        <testcase classname="tests/integration/github-api.test.ts" name="GitHub API Integration Tests &gt; HTTP Client Testing &gt; should set up nock interceptors correctly" time="0.000532327">
+        </testcase>
+    </testsuite>
+</testsuites>

@@ -19,7 +19,7 @@ describe("ConfigLoader", () => {
   });
 
   afterEach(async () => {
-    await fs.remove(testDir);
+    await fs.rm(testDir, { recursive: true, force: true });
   });
 
   describe("JSONConfigLoader", () => {

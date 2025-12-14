@@ -1,20 +1,21 @@
 {
-  "timestamp": "2025-12-10T01:54:02.641668",
-  "overall_healthy": false,
+  "timestamp": "2025-12-14T00:35:57.062713",
+  "overall_healthy": true,
   "sync_health": {
-    "healthy": false,
-    "issues": [
-      "Beads daemon health issues: {'daemons': None, 'healthy': 0, 'mismatched': 0, 'stale': 0, 'total': 0, 'unresponsive': 0}"
-    ]
+    "healthy": true,
+    "issues": []
   },
   "daemon_health": {
-    "overall_healthy": false,
+    "overall_healthy": true,
     "pm2_status": {
-      "running": false
+      "running": true,
+      "pid": 117622,
+      "status": "online",
+      "uptime": 1765700689836
     },
     "beads_health": {
       "healthy": true,
-      "output": "{\n  \"daemons\": null,\n  \"healthy\": 0,\n  \"mismatched\": 0,\n  \"stale\": 0,\n  \"total\": 0,\n  \"unresponsive\": 0\n}\n"
+      "output": "{\n  \"daemons\": [\n    {\n      \"workspace\": \"/home/pwarnock/github/liaison-toolkit\",\n      \"socket_path\": \"/home/pwarnock/github/liaison-toolkit/.beads/bd.sock\",\n      \"pid\": 117633,\n      \"version\": \"0.29.0\",\n      \"status\": \"healthy\"\n    }\n  ],\n  \"healthy\": 1,\n  \"mismatched\": 0,\n  \"stale\": 0,\n  \"total\": 1,\n  \"unresponsive\": 0\n}\n"
     },
     "pm2_available": true
   }
