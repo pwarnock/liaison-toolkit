@@ -16,7 +16,7 @@ const packageRoot = dirname(dirname(__dirname));
  */
 
 export function generateAgentConfig(name: string, options: AgentOptions = {}): string {
-  const templatePath = pathJoin(packageRoot, 'templates/agents/custom-agent.md.template');
+  const templatePath = pathJoin(__dirname, '../templates/agents/custom-agent.md.template');
   const template = readFileSync(templatePath, 'utf8');
   
   // Use default model (big-pickle) - models managed through configuration
@@ -59,6 +59,6 @@ export function generateConfig(options: ConfigOptions = {}): string {
 }
 
 export function loadTemplate(templateName: string): string {
-  const templatePath = pathJoin(packageRoot, 'templates/agents', `${templateName}.md.template`);
+  const templatePath = pathJoin(__dirname, `../templates/agents/${templateName}.md.template`);
   return readFileSync(templatePath, 'utf8');
 }

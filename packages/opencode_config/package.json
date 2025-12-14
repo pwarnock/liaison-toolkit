@@ -2,11 +2,11 @@
   "name": "@pwarnock/opencode_config",
   "version": "1.0.0",
   "description": "OpenCode configuration package for liaison-toolkit",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --target node --format esm",
+    "build": "bun build src/index.ts --outdir dist --target node --format esm && tsc --emitDeclarationOnly --outDir dist",
     "dev": "bun --watch src/index.ts",
     "type-check": "tsc --noEmit",
     "test": "bun test",
@@ -32,8 +32,8 @@
   },
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./templates": "./templates/",
     "./scripts": "./src/scripts/"
