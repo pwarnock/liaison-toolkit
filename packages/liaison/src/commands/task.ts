@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { BeadsAdapter } from '../reconciler/adapters/beads-adapter';
 import type { Task, TaskFilter } from '../reconciler/types';
+import { agenticWorkflowManager } from '../agentic-workflow-manager.js';
 
 /**
  * Format task for human-readable output
@@ -58,6 +59,8 @@ export function createTaskCommand(): Command {
     .description('Create a new task')
     .option('--description <text>', 'Task description')
     .option('--assigned-to <user>', 'Assign task to user')
+    .option('--auto-trigger <workflow>', 'Automatically trigger workflow when task is created')
+    .option('--priority <level>', 'Task priority (low, medium, high, critical)')
     .option('--json', 'Output as JSON')
     .action(async (title: string, options) => {
       const spinner = ora('Creating task...').start();
@@ -76,7 +79,34 @@ export function createTaskCommand(): Command {
           title,
           description: options.description,
           assignedTo: options.assignedTo,
+          priority: options.priority || 'medium',
         });
+
+        // Emit task creation event for agentic workflow triggers
+        console.log(`🔄 Task created: ${task.id} - checking for auto-triggers...`);
+        
+        // Auto-trigger workflows if requested
+        if (options.autoTrigger) {
+          console.log(`🚀 Auto-triggering workflow: ${options.autoTrigger}`);
+          // This would integrate with workflow engine
+          console.log(`📋 Task priority: ${task.priority || 'medium'}`);
+          console.log(`🎯 Ready for agentic workflow integration`);
+          
+          // Process task event through agentic workflow manager
+          const triggeredWorkflows = await agenticWorkflowManager.processTaskEvent({
+            type: 'created',
+            taskId: task.id,
+            task,
+            timestamp: new Date()
+          });
+          
+          if (triggeredWorkflows.length > 0) {
+            console.log(chalk.green(`✨ Agentic workflows triggered: ${triggeredWorkflows.join(', ')}`));
+          }
+        }
+        
+        // Check if this task should trigger any workflows (handled by agentic workflow manager)
+        // This is now handled by the agentic workflow manager above
 
         if (options.json) {
           spinner.stop();

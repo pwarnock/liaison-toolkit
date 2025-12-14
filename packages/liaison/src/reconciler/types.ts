@@ -16,6 +16,7 @@ export interface Task {
   status: TaskStatus;
   createdAt: Date;
   closedAt?: Date;
+  priority?: 'low' | 'medium' | 'high' | 'critical';
 }
 
 export interface TasklistRow {
@@ -36,6 +37,7 @@ export interface CreateTaskInput {
   title: string;
   description?: string;
   assignedTo?: string;
+  priority?: 'low' | 'medium' | 'high' | 'critical';
 }
 
 export interface VersionConfig {
