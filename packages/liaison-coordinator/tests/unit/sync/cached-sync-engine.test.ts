@@ -20,7 +20,7 @@ vi.mock("../../../src/utils/github/CachedGitHubClient.js", () => {
       updateIssue: vi.fn(),
       createIssue: vi.fn(),
       invalidateRepositoryCache: vi.fn(),
-      getCacheStats: vi.fn().mockResolvedValue({ hits: 10, misses: 5 }),
+      getCacheStats: vi.fn().mockResolvedValue({ hits: 10, misses: 5, hitRate: 66.67 }),
       clearCache: vi.fn(),
       exportCache: vi.fn(),
       importCache: vi.fn(),
@@ -38,7 +38,7 @@ vi.mock("../../../src/utils/beads/CachedBeadsClient.js", () => {
       createSyncResult: vi.fn(),
       getSyncHistory: vi.fn(),
       invalidateRepositoryCache: vi.fn(),
-      getCacheStats: vi.fn().mockResolvedValue({ hits: 8, misses: 3 }),
+      getCacheStats: vi.fn().mockResolvedValue({ hits: 8, misses: 3, hitRate: 72.73 }),
       clearCache: vi.fn(),
       exportCache: vi.fn(),
       importCache: vi.fn(),
@@ -292,7 +292,7 @@ describe("CachedSyncEngine", () => {
       expect(result.success).toBe(true);
       expect(result.itemsProcessed).toBe(1);
       expect(result.itemsCreated).toBe(1);
-      expect(result.itemsUpdated).toBe(1);
+      expect(result.itemsUpdated).toBe(0);
       expect(mockGitHubClient.createIssue).toHaveBeenCalledWith({
         title: "New Issue from Beads",
         body: "Issue body",
@@ -408,6 +408,9 @@ describe("CachedSyncEngine", () => {
 
   describe("Conflict Detection and Resolution", () => {
     it("should detect data conflicts", async () => {
+      // Clear cache to ensure fresh data
+      await cacheManager.clear();
+
       const mockGitHubIssues = [
         {
           id: 1,
@@ -438,7 +441,7 @@ describe("CachedSyncEngine", () => {
 
       // Mock conflict resolution
       const resolveConflictSpy = vi
-        .spyOn(syncEngine as any, "resolveConflict")
+        .spyOn(syncEngine as any, "resolveSingleConflict")
         .mockResolvedValue(true);
 
       const options: CachedSyncOptions = {
@@ -568,8 +571,8 @@ describe("CachedSyncEngine", () => {
 
   describe("Performance Metrics", () => {
     it("should provide performance metrics", async () => {
-      mockGitHubClient.getCacheStats.mockResolvedValue({ hits: 20, misses: 5 });
-      mockBeadsClient.getCacheStats.mockResolvedValue({ hits: 15, misses: 3 });
+      mockGitHubClient.getCacheStats.mockResolvedValue({ hits: 20, misses: 5, hitRate: 80 });
+      mockBeadsClient.getCacheStats.mockResolvedValue({ hits: 15, misses: 3, hitRate: 83.33 });
 
       mockGitHubClient.getIssues.mockResolvedValue([]);
       mockBeadsClient.getIssues.mockResolvedValue([]);

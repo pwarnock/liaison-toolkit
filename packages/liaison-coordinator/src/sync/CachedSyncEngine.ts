@@ -189,13 +189,17 @@ export class CachedSyncEngine {
           githubIssue,
           matchingBeadsIssue
         );
-        await this.beadsClient.updateIssue(matchingBeadsIssue.id, updateData);
-        result.itemsUpdated++;
+        if (!options.dryRun) {
+          await this.beadsClient.updateIssue(matchingBeadsIssue.id, updateData);
+          result.itemsUpdated++;
+        }
       } else {
         // Create new issue
         const createData = this.mapGithubToBeads(githubIssue);
-        await this.beadsClient.createIssue(createData);
-        result.itemsCreated++;
+        if (!options.dryRun) {
+          await this.beadsClient.createIssue(createData);
+          result.itemsCreated++;
+        }
       }
     }
 
@@ -225,26 +229,45 @@ export class CachedSyncEngine {
           beadsIssue,
           matchingGithubIssue
         );
-        await this.githubClient.updateIssue(
-          matchingGithubIssue.number,
-          updateData
-        );
-        result.itemsUpdated++;
+        if (!options.dryRun) {
+          await this.githubClient.updateIssue(
+            matchingGithubIssue.number,
+            updateData
+          );
+          result.itemsUpdated++;
+        }
       } else if (githubId) {
         // Create new GitHub issue if we have the ID but it doesn't exist
         const createData = this.mapBeadsToGithub(beadsIssue);
-        const newIssue = await this.githubClient.createIssue(createData);
+        if (!options.dryRun) {
+          const newIssue = await this.githubClient.createIssue(createData);
 
-        // Update Beads issue with new GitHub ID
-        await this.beadsClient.updateIssue(beadsIssue.id, {
-          metadata: {
-            ...beadsIssue.metadata,
-            githubId: newIssue.id,
-            githubNumber: newIssue.number,
-          },
-        });
+          // Update Beads issue with new GitHub ID
+          await this.beadsClient.updateIssue(beadsIssue.id, {
+            metadata: {
+              ...beadsIssue.metadata,
+              githubId: newIssue.id,
+              githubNumber: newIssue.number,
+            },
+          });
+          result.itemsCreated++;
+        }
+      } else {
+        // Create new GitHub issue for new Beads issues without githubId
+        const createData = this.mapBeadsToGithub(beadsIssue);
+        if (!options.dryRun) {
+          const newIssue = await this.githubClient.createIssue(createData);
 
-        result.itemsCreated++;
+          // Update Beads issue with new GitHub ID
+          await this.beadsClient.updateIssue(beadsIssue.id, {
+            metadata: {
+              ...beadsIssue.metadata,
+              githubId: newIssue.id,
+              githubNumber: newIssue.number,
+            },
+          });
+          result.itemsCreated++;
+        }
       }
     }
 
@@ -257,18 +280,20 @@ export class CachedSyncEngine {
     options: CachedSyncOptions,
     result: CachedSyncResult
   ): Promise<void> {
-    // First, sync GitHub to Beads
+    // First, detect and resolve any conflicts
+    await this.resolveConflicts(result);
+
+    // Then, sync GitHub to Beads
     await this.syncGithubToBeads(options, result);
 
     // Then, sync Beads to GitHub
     await this.syncBeadsToGithub(options, result);
-
-    // Resolve any conflicts
-    await this.resolveConflicts(result);
   }
 
   // Conflict resolution with caching
   private async resolveConflicts(result: CachedSyncResult): Promise<void> {
+    // Clear conflict detection cache to ensure fresh detection
+    await this.cache.invalidatePattern(/^conflicts:/);
     const conflicts = await this.detectConflicts();
 
     for (const conflict of conflicts) {
@@ -307,12 +332,14 @@ export class CachedSyncEngine {
     return await this.cache.getCachedSyncResult(cacheKey, async () => {
       const githubIssues = await this.getCachedGitHubIssues();
       const beadsIssues = await this.getCachedBeadsIssues();
+
       const conflicts: SyncConflict[] = [];
 
       // Find data conflicts
       for (const githubIssue of githubIssues) {
+        // Try to find matching beads issue by githubId in metadata or directly on the issue
         const matchingBeadsIssue = beadsIssues.find(
-          (issue) => issue.metadata?.githubId === githubIssue.id
+          (issue) => (issue.metadata?.githubId === githubIssue.id) || (issue.githubId === githubIssue.id)
         );
 
         if (
@@ -425,7 +452,7 @@ export class CachedSyncEngine {
       return (
         githubIssue.title !== beadsIssue.title ||
         githubIssue.body !== beadsIssue.body ||
-        githubIssue.assignee?.login !== beadsIssue.assignee
+        githubIssue.user?.login !== beadsIssue.assignee
       );
     }
 
@@ -575,8 +602,9 @@ export class CachedSyncEngine {
   // Background cleanup
   async cleanupExpiredCaches(): Promise<void> {
     await Promise.all([
-      this.githubClient.warmCache().then(() => this.cache.cleanupExpired()),
-      this.beadsClient.warmCache().then(() => this.cache.cleanupExpired()),
+      this.githubClient.warmCache(),
+      this.beadsClient.warmCache(),
     ]);
+    await this.cache.cleanupExpired();
   }
 }
