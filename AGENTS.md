@@ -1,6 +1,4 @@
-# Agent Guidelines for Liaison-Toolkit
-
-This file documents the golden path for AI agents working on this project.
+# AGENTS.md - Updated with Bun Build Guidelines
 
 ## Golden Path: Don't Look Behind the Curtain to Make Decisions
 
@@ -113,6 +111,23 @@ User: "That's not what I wanted..."
 - ✅ Ask: "Should we break this into atomic subtasks?"
 - ✅ Wait for answer before creating
 
+## Build System & Development Workflow
+
+- ✅ **Primary Build Tool**: Use Bun for all builds (`bun run build`)
+- ✅ **Clean TypeScript Imports**: No `.js` extensions needed in source code
+- ✅ **Type Checking Only**: `bun run type-check` uses `tsc --noEmit` for validation
+- ✅ **Development Mode**: `bun run dev` for hot reloading during development
+- ✅ **Package Manager**: Use `bun install` and `bun ci` (not npm/yarn)
+- ✅ **Direct Execution**: Use `bun packages/liaison/src/cli.ts` for development
+- ❌ **Deprecated**: Never use `tsc` for compilation, only for type checking
+- ✅ **Smoke Testing**: Run `./scripts/cli_smoke_test.sh` after builds
+
+### CLI Execution Patterns
+
+- ✅ **Development**: `bun packages/liaison/src/cli.ts [command]`
+- ✅ **Production**: `node packages/liaison/dist/cli.js [command]`
+- ✅ **Consistency**: All documentation should reference Bun execution pattern
+
 ## Documentation Standards
 
 - Keep this file as source of truth
@@ -129,6 +144,18 @@ Examples of breaking the golden path:
 4. ❌ Used code visibility to make decisions (test structure, file locations)
 5. ❌ Assumed approval to proceed without waiting
 
+## Success Stories
+
+### Phase 1: Build System Migration (COMPLETED 2025-12-14)
+**Problem**: CLI built with tsc failed to run in Node.js ESM environment
+**Solution**: Successfully migrated to Bun build system
+**Result**: 
+- ✅ Build time reduced from ~2-3s to ~40ms
+- ✅ ESM compatibility resolved
+- ✅ Hot reloading available
+- ✅ Smoke tests pass
+- ✅ Dogfooding workflow restored
+
 ## How Future Sessions Should Start
 
 New agents should:
@@ -142,5 +169,6 @@ New agents should:
 
 ---
 
-**Last updated**: 2025-12-13
+**Last updated**: 2025-12-14
 **Golden path enforced**: Ask → Plan → Approve → Execute (never: See → Assume → Execute)
+**Build system**: Bun-native with TypeScript support
