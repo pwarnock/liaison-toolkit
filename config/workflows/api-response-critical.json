@@ -1,0 +1,9 @@
+{
+  "id": "api-response-critical",
+  "name": "Critical API Response Workflow",
+  "description": "Automated response to critical API failures and downtime",
+  "created_at": "2025-12-14T00:00:00Z",
+  "triggers": ["api-monitoring", "critical", "endpoint-down"],
+  "actions": ["investigate", "alert-team", "escalate", "monitor-recovery"],
+  "template": "api-critical"
+}

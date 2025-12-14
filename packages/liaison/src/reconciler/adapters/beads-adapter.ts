@@ -19,6 +19,7 @@ interface BeadsTaskData {
   created_at: string;
   updated_at: string;
   closed_at?: string;
+  labels?: string[];
 }
 
 // Helper to spawn a command and return its output
@@ -112,10 +113,16 @@ export class BeadsAdapter implements TaskBackendAdapter {
     try {
       const args = ['create', `--title=${input.title}`];
       if (input.description) {
-        args.push(`--description=${input.description}`);
+        args.push(`--description=${this.buildDescription(input)}`);
       }
       if (input.assignedTo) {
         args.push(`--assigned-to=${input.assignedTo}`);
+      }
+      if (input.priority) {
+        args.push(`--priority=${this.mapPriority(input.priority)}`);
+      }
+      if (input.tags && input.tags.length > 0) {
+        args.push(`--labels=${input.tags.join(',')}`);
       }
       args.push('--json');
 
@@ -150,6 +157,71 @@ export class BeadsAdapter implements TaskBackendAdapter {
     }
   }
 
+  /**
+   * Build description with metadata encoding
+   */
+  private buildDescription(input: CreateTaskInput): string {
+    let description = input.description || '';
+    
+    // Encode metadata in description if present
+    if (input.metadata && Object.keys(input.metadata).length > 0) {
+      const metadataJson = JSON.stringify(input.metadata);
+      description += `\n\n<!-- METADATA: ${metadataJson} -->`;
+    }
+    
+    return description;
+  }
+
+  /**
+   * Map priority levels to BD format
+   */
+  private mapPriority(priority: 'low' | 'medium' | 'high' | 'critical'): string {
+    const priorityMap = {
+      'low': '4',
+      'medium': '2', 
+      'high': '1',
+      'critical': '0'
+    };
+    return priorityMap[priority] || '2';
+  }
+
+  /**
+   * Extract metadata from task description
+   */
+  private extractMetadata(description: string): Record<string, any> {
+    const metadataMatch = description.match(/<!-- METADATA: (.+?) -->/);
+    if (metadataMatch) {
+      try {
+        return JSON.parse(metadataMatch[1]);
+      } catch {
+        return {};
+      }
+    }
+    return {};
+  }
+
+  /**
+   * Map BD status to TaskStatus enum
+   */
+  private mapStatus(status: string): TaskStatus {
+    const statusMap: Record<string, TaskStatus> = {
+      'open': TS.Open,
+      'closed': TS.Closed,
+      'deleted': TS.Deleted
+    };
+    return statusMap[status] || TS.Open;
+  }
+
+  /**
+   * Map BD priority to our priority format
+   */
+  private mapPriorityFromBeads(priority: number): 'low' | 'medium' | 'high' | 'critical' {
+    if (priority === 0) return 'critical';
+    if (priority === 1) return 'high';
+    if (priority === 2) return 'medium';
+    return 'low';
+  }
+
   async healthCheck(): Promise<boolean> {
     try {
       const { stdout } = await spawnPromise(
@@ -168,13 +240,19 @@ export class BeadsAdapter implements TaskBackendAdapter {
   }
 
   private parseTask(data: BeadsTaskData): Task {
+    const metadata = this.extractMetadata(data.description || '');
+    const cleanDescription = data.description?.replace(/<!-- METADATA: .+? -->\n?/, '').trim();
+    
     return {
       id: data.id,
       title: data.title,
-      description: data.description,
-      status: this.parseStatus(data.status),
+      description: cleanDescription,
+      status: this.mapStatus(data.status),
       createdAt: new Date(data.created_at),
       closedAt: data.closed_at ? new Date(data.closed_at) : undefined,
+      priority: this.mapPriorityFromBeads(data.priority),
+      tags: data.labels || [],
+      metadata
     };
   }
 

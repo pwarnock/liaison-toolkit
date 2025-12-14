@@ -357,3 +357,173 @@ private setupWorkflowCompletionListener(): void
 **The agentic workflow system is now FULLY IMPLEMENTED and PRODUCTION-READY!** 🎉
 
 **Next sessions can focus on advanced scaling features rather than foundation work - the core agentic automation platform is complete and operational!** 🚀
+
+---
+
+## 🔄 **UPDATE: Phase 3 - File System Triggers - COMPLETED 2025-12-14**
+
+### **🚀 Session Achievement: Advanced File System Automation**
+
+This session completed **File System Triggers** - the next major scaling feature for the agentic workflow system, enabling automatic workflow triggering from git commits and file modifications.
+
+---
+
+## 🎯 **Major Features Implemented**
+
+### **1. File System Watcher Class** ✅
+**Created**: `packages/liaison/src/file-system-watcher.ts`
+```typescript
+export class FileSystemWatcher extends EventEmitter {
+  // Monitors file system changes and triggers workflows
+  // Git commit monitoring every 5 seconds
+  // File watching with recursive directory monitoring
+  // Automatic task creation with priority-based routing
+}
+```
+
+### **2. Git Commit Monitoring** ✅
+**Enhanced**: Real-time git commit detection
+- **Automatic Detection**: Monitors git HEAD every 5 seconds
+- **Commit Analysis**: Extracts commit message, author, and changes
+- **Task Creation**: Creates "Git commit detected" tasks automatically
+- **Priority Assignment**: Critical for config changes, high for source code
+
+### **3. File Change Watching** ✅
+**Implemented**: Recursive file system monitoring
+```bash
+# Start watching directories for changes
+liaison workflow watch packages/liaison/src
+liaison workflow watch config/
+liaison workflow watch docs/
+
+# Monitor file system watcher status
+liaison workflow watch-status
+```
+
+### **4. Smart Priority Assignment** ✅
+**Added**: Context-aware priority determination
+- **Critical**: Configuration files (`package.json`, `tsconfig.json`, `/config/`)
+- **High**: Source code changes (`/src/`, `/packages/`, `.ts`, `.js`)
+- **Medium**: Documentation changes (`/docs/`, `.md`)
+- **Low**: All other file changes
+
+### **5. CLI Integration** ✅
+**Enhanced**: `packages/liaison/src/commands/workflow.ts`
+```bash
+# ✅ New file system commands:
+liaison workflow watch <path>        # Start watching directory
+liaison workflow watch <path> --stop # Stop watching directory  
+liaison workflow watch-status         # Show watcher statistics
+```
+
+---
+
+## 📊 **Technical Implementation Details**
+
+### **File System Trigger Types**:
+```typescript
+// Git commit triggers
+'git-commit' → git-commit-response workflow
+
+// File modification triggers  
+'file-modified' → code-change-response workflow (source files)
+'file-modified' → config-change-response workflow (config files)
+'file-modified' → documentation-update workflow (docs)
+```
+
+### **Workflow Configurations Created**:
+- `config/workflows/git-commit-response.json` - Git commit automation
+- `config/workflows/code-change-response.json` - Source code changes
+- `config/workflows/config-change-response.json` - Configuration changes
+
+### **Integration Points**:
+```typescript
+// File system watcher integrated into agentic workflow manager
+this.fileSystemWatcher = initializeFileSystemWatcher(this);
+
+// Automatic task creation from file system events
+await this.createTaskFromFileSystemEvent(event, workflowId);
+```
+
+---
+
+## 🎯 **Current System State: ENHANCED**
+
+### **Liaison is now a TRUE agentic automation platform with file system awareness**:
+
+#### ✅ **Tasks Drive Workflows** (Intelligent Triggering)
+- Content-based triggering (security, bug, documentation keywords)
+- Priority-based triggering (high, critical tasks)
+- **File system triggering** (git commits, file modifications) 🆕
+
+#### ✅ **Work Creates More Work** (Closed-Loop Automation)
+- Workflows automatically create relevant subtasks
+- Each subtask can trigger additional specialized workflows
+- **File system changes create tasks** that trigger workflows 🆕
+
+#### ✅ **Automation is Intelligent** (Context-Aware)
+- Workflow selection based on task properties
+- Subtask definitions tailored to workflow type
+- **Smart priority assignment based on file types** 🆕
+
+#### ✅ **Foundation is Stable** (All Critical Issues Resolved)
+- Build system: Bun-native (40ms builds)
+- Performance: 99% faster reconciler operations
+- Testing: 20/20 E2E tests passing
+- **File system monitoring operational** 🆕
+
+#### ✅ **Ready for Scaling** (Extensible Architecture)
+- Plugin-based workflow system
+- Event-driven architecture for new triggers
+- **File system event handling integrated** 🆕
+
+---
+
+## 🚀 **What's Ready for Next Phase**
+
+### **Completed High-Priority Features**:
+- ✅ TypeScript workflow command integration
+- ✅ Task-to-workflow automatic triggering
+- ✅ Workflow-to-task automation (subtask creation)
+- ✅ Git commit automation from workflow completion
+- ✅ **File system triggers and monitoring** 🆕
+
+### **Available for Next Sessions**:
+- **API Response Triggers** - External system status changes  
+- **Time-Based Triggers** - Scheduled automation (daily, weekly)
+- **Smart Assignment** - Agent availability, skill-based routing
+- **Monitoring & Analytics** - Performance tracking, optimization metrics
+- **TypeScript Migration** - Replace remaining Python scripts
+
+---
+
+## 📚 **Documentation & Knowledge Transfer**
+
+### **Updated**:
+- `AGENTS.md` - Added comprehensive agentic workflow guidelines
+- `docs/reports/agentic-workflow-handoff.md` - Complete implementation record
+- `config/workflows/` - 6 workflow configurations (3 new)
+- `packages/liaison/src/file-system-watcher.ts` - **NEW** File system monitoring
+- `packages/liaison/src/commands/workflow.ts` - **ENHANCED** File system commands
+
+### **Commit History**:
+- `7ed966f` - "feat: Complete advanced agentic workflow automation system"
+- `f4e83a0` - "feat: Implement Option C - Create missing workflow scripts"
+- `089774d` - "feat: Add file system triggers for agentic workflows" 🆕
+- All changes successfully pushed to remote repository
+
+---
+
+## 🎯 **The Transformation Continues**
+
+**Liaison has evolved from manual task management to intelligent agentic automation with file system awareness where:**
+
+1. **Tasks drive workflows** ✅ (Automatic triggering based on content/priority)
+2. **Work creates more work** ✅ (Closed-loop subtask creation)  
+3. **Automation is intelligent** ✅ (Context-aware workflow selection)
+4. **Humans focus on high-value work** ✅ (System handles repetitive automation)
+5. **File system changes trigger automation** ✅ (Git commits and file modifications) 🆕
+
+**The agentic workflow system now includes comprehensive file system monitoring and is ready for the next scaling phase!** 🎉
+
+**Next sessions can focus on API Response Triggers and Time-Based automation - the file system foundation is complete and operational!** 🚀

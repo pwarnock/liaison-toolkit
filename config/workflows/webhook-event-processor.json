@@ -1,0 +1,9 @@
+{
+  "id": "webhook-event-processor",
+  "name": "Webhook Event Processing Workflow",
+  "description": "Automated processing of webhook events from external systems",
+  "created_at": "2025-12-14T00:00:00Z",
+  "triggers": ["webhook", "automated", "external-event"],
+  "actions": ["parse-event", "validate-payload", "create-tasks", "notify-team"],
+  "template": "webhook-processor"
+}

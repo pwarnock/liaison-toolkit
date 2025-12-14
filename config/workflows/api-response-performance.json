@@ -1,0 +1,9 @@
+{
+  "id": "api-response-performance",
+  "name": "API Performance Degradation Workflow",
+  "description": "Automated response to API performance issues and slow response times",
+  "created_at": "2025-12-14T00:00:00Z",
+  "triggers": ["api-monitoring", "performance", "rt-poor", "rt-critical"],
+  "actions": ["analyze-performance", "check-resources", "optimize-endpoint", "monitor-trends"],
+  "template": "api-performance"
+}

@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { spawn } from 'child_process';
 import { agenticWorkflowManager } from '../agentic-workflow-manager';
+import { APIEndpoint } from '../api-response-monitor';
 
 /**
  * Get subtask definitions based on workflow type
@@ -358,6 +359,16 @@ console.log(chalk.bold('\nRecent Events:'));
         console.log(`  Last Git Commit: ${fsStats.lastGitCommit || 'None'}`);
         console.log(`  File System Triggers: ${fsStats.totalTriggers}`);
       }
+
+      // Show API monitor stats
+      const apiStats = agenticWorkflowManager.getAPIMonitorStats();
+      if (apiStats) {
+        console.log(chalk.bold('\n🔍 API Response Monitor:'));
+        console.log(`  Total Endpoints: ${apiStats.totalEndpoints}`);
+        console.log(`  Active Endpoints: ${apiStats.activeEndpoints}`);
+        console.log(`  Failed Endpoints: ${apiStats.failedEndpoints}`);
+        console.log(`  Uptime: ${Math.round(apiStats.uptime)}s`);
+      }
     });
 
   // liaison workflow watch
@@ -429,6 +440,186 @@ console.log(chalk.bold('\nRecent Events:'));
         console.log(`  ${index + 1}. ${event.type.toUpperCase()} - ${event.path} (${event.timestamp.toISOString()})`);
       });
     });
+
+  // liaison api commands
+  const apiCommand = new Command('api')
+    .description('Manage API monitoring endpoints');
+
+  // liaison api list
+  apiCommand
+    .command('list')
+    .description('List all API endpoints')
+    .option('--json', 'Output as JSON')
+    .action(async (options) => {
+      const spinner = ora('Fetching API endpoints...').start();
+      
+      try {
+        const endpoints = agenticWorkflowManager.getAPIEndpoints();
+        
+        spinner.stop();
+        
+        if (options.json) {
+          console.log(JSON.stringify(endpoints, null, 2));
+        } else {
+          console.log(chalk.blue('🔍 API Endpoints:\n'));
+          
+          endpoints.forEach((endpoint: APIEndpoint) => {
+            const status = endpoint.enabled ? 
+              chalk.green('✅ Enabled') : 
+              chalk.red('❌ Disabled');
+            const lastCheck = endpoint.lastChecked ? 
+              new Date(endpoint.lastChecked).toLocaleString() : 
+              'Never';
+            const failures = endpoint.consecutiveFailures > 0 ? 
+              chalk.red(`(${endpoint.consecutiveFailures} failures)`) : 
+              '';
+            
+            console.log(chalk.bold(`  ${endpoint.name} (${endpoint.id})`));
+            console.log(`    URL: ${endpoint.url}`);
+            console.log(`    Method: ${endpoint.method}`);
+            console.log(`    Interval: ${endpoint.interval}s`);
+            console.log(`    Status: ${status} ${failures}`);
+            console.log(`    Last Check: ${lastCheck}`);
+            console.log('');
+          });
+        }
+      } catch (error) {
+        spinner.fail(chalk.red(`Failed to list endpoints: ${error}`));
+        process.exit(1);
+      }
+    });
+
+  // liaison api add
+  apiCommand
+    .command('add <id> <name> <url>')
+    .description('Add a new API endpoint to monitor')
+    .option('--method <method>', 'HTTP method (GET, POST, PUT, DELETE)', 'GET')
+    .option('--timeout <ms>', 'Request timeout in milliseconds', '5000')
+    .option('--interval <seconds>', 'Check interval in seconds', '60')
+    .option('--enabled', 'Enable endpoint immediately', false)
+    .action(async (id: string, name: string, url: string, options) => {
+      const spinner = ora(`Adding API endpoint ${name}...`).start();
+      
+      try {
+        const endpoint: APIEndpoint = {
+          id,
+          name,
+          url,
+          method: options.method as any,
+          timeout: parseInt(options.timeout),
+          interval: parseInt(options.interval),
+          enabled: options.enabled,
+          consecutiveFailures: 0
+        };
+        
+        agenticWorkflowManager.addAPIEndpoint(endpoint);
+        
+        spinner.succeed(chalk.green(`Added API endpoint: ${name}`));
+        console.log(chalk.blue(`Endpoint ID: ${id}`));
+        console.log(chalk.blue(`URL: ${url}`));
+        console.log(chalk.blue(`Status: ${options.enabled ? 'Enabled' : 'Disabled'}`));
+      } catch (error) {
+        spinner.fail(chalk.red(`Failed to add endpoint: ${error}`));
+        process.exit(1);
+      }
+    });
+
+  // liaison api remove
+  apiCommand
+    .command('remove <id>')
+    .description('Remove an API endpoint')
+    .action(async (id: string) => {
+      const spinner = ora(`Removing API endpoint ${id}...`).start();
+      
+      try {
+        agenticWorkflowManager.removeAPIEndpoint(id);
+        spinner.succeed(chalk.green(`Removed API endpoint: ${id}`));
+      } catch (error) {
+        spinner.fail(chalk.red(`Failed to remove endpoint: ${error}`));
+        process.exit(1);
+      }
+    });
+
+  // liaison api enable/disable
+  apiCommand
+    .command('enable <id>')
+    .description('Enable an API endpoint')
+    .action(async (id: string) => {
+      const spinner = ora(`Enabling API endpoint ${id}...`).start();
+      
+      try {
+        agenticWorkflowManager.updateAPIEndpoint(id, { enabled: true });
+        spinner.succeed(chalk.green(`Enabled API endpoint: ${id}`));
+      } catch (error) {
+        spinner.fail(chalk.red(`Failed to enable endpoint: ${error}`));
+        process.exit(1);
+      }
+    });
+
+  apiCommand
+    .command('disable <id>')
+    .description('Disable an API endpoint')
+    .action(async (id: string) => {
+      const spinner = ora(`Disabling API endpoint ${id}...`).start();
+      
+      try {
+        agenticWorkflowManager.updateAPIEndpoint(id, { enabled: false });
+        spinner.succeed(chalk.green(`Disabled API endpoint: ${id}`));
+      } catch (error) {
+        spinner.fail(chalk.red(`Failed to disable endpoint: ${error}`));
+        process.exit(1);
+      }
+    });
+
+  // liaison api check
+  apiCommand
+    .command('check <id>')
+    .description('Manually check an API endpoint')
+    .action(async (id: string) => {
+      const spinner = ora(`Checking API endpoint ${id}...`).start();
+      
+      try {
+        await agenticWorkflowManager.checkAPIEndpoint(id);
+        spinner.succeed(chalk.green(`Checked API endpoint: ${id}`));
+      } catch (error) {
+        spinner.fail(chalk.red(`Failed to check endpoint: ${error}`));
+        process.exit(1);
+      }
+    });
+
+  // liaison api start/stop
+  apiCommand
+    .command('start')
+    .description('Start API monitoring')
+    .action(async () => {
+      const spinner = ora('Starting API monitoring...').start();
+      
+      try {
+        await agenticWorkflowManager.startAPIMonitoring();
+        spinner.succeed(chalk.green('API monitoring started'));
+      } catch (error) {
+        spinner.fail(chalk.red(`Failed to start API monitoring: ${error}`));
+        process.exit(1);
+      }
+    });
+
+  apiCommand
+    .command('stop')
+    .description('Stop API monitoring')
+    .action(async () => {
+      const spinner = ora('Stopping API monitoring...').start();
+      
+      try {
+        await agenticWorkflowManager.stopAPIMonitoring();
+        spinner.succeed(chalk.green('API monitoring stopped'));
+      } catch (error) {
+        spinner.fail(chalk.red(`Failed to stop API monitoring: ${error}`));
+        process.exit(1);
+      }
+    });
+
+  // Add API command to main workflow program
+  command.addCommand(apiCommand);
 
   return command;
 }

@@ -17,6 +17,8 @@ export interface Task {
   createdAt: Date;
   closedAt?: Date;
   priority?: 'low' | 'medium' | 'high' | 'critical';
+  tags?: string[];
+  metadata?: Record<string, any>;
 }
 
 export interface TasklistRow {
@@ -38,6 +40,8 @@ export interface CreateTaskInput {
   description?: string;
   assignedTo?: string;
   priority?: 'low' | 'medium' | 'high' | 'critical';
+  tags?: string[];
+  metadata?: Record<string, any>;
 }
 
 export interface VersionConfig {

@@ -11,6 +11,7 @@ import { TaskStatus } from './reconciler/types';
 import { spawn } from 'child_process';
 import { appendFileSync } from 'fs';
 import { initializeFileSystemWatcher, FileSystemWatcher } from './file-system-watcher';
+import { APIResponseMonitor, APIResponseEvent, APIEndpoint, APIResponseMonitorConfig } from './api-response-monitor';
 
 export interface TaskEvent {
   type: 'created' | 'updated' | 'closed';
@@ -31,12 +32,14 @@ export class AgenticWorkflowManager extends EventEmitter {
   private triggers: Map<string, WorkflowTrigger[]> = new Map();
   private eventHistory: TaskEvent[] = [];
   private fileSystemWatcher?: FileSystemWatcher;
+  private apiMonitor?: APIResponseMonitor;
 
   constructor() {
     super();
     this.setupDefaultTriggers();
     this.setupWorkflowCompletionListener();
     this.fileSystemWatcher = initializeFileSystemWatcher(this);
+    this.initializeAPIMonitor();
   }
 
   /**
@@ -236,6 +239,263 @@ export class AgenticWorkflowManager extends EventEmitter {
    */
   getFileSystemWatcherStats(): any {
     return this.fileSystemWatcher?.getWatcherStats() || null;
+  }
+
+  /**
+   * Initialize API Response Monitor
+   */
+  private initializeAPIMonitor(): void {
+    const defaultEndpoints: APIEndpoint[] = [
+      {
+        id: 'github-api',
+        name: 'GitHub API Status',
+        url: 'https://api.github.com',
+        method: 'GET',
+        timeout: 5000,
+        interval: 60,
+        enabled: false, // Disabled by default
+        consecutiveFailures: 0
+      },
+      {
+        id: 'health-check',
+        name: 'Local Health Check',
+        url: 'http://localhost:3000/health',
+        method: 'GET',
+        timeout: 3000,
+        interval: 30,
+        enabled: false, // Disabled by default
+        consecutiveFailures: 0
+      }
+    ];
+
+    const config: APIResponseMonitorConfig = {
+      endpoints: defaultEndpoints,
+      webhookPort: 8080,
+      webhookPath: '/webhook',
+      maxConsecutiveFailures: 3,
+      retryAttempts: 2
+    };
+
+    this.apiMonitor = new APIResponseMonitor(config);
+    this.setupAPIMonitorListeners();
+  }
+
+  /**
+   * Setup API monitor event listeners
+   */
+  private setupAPIMonitorListeners(): void {
+    if (!this.apiMonitor) return;
+
+    this.apiMonitor.on('api-event', async (event: APIResponseEvent) => {
+      await this.processAPIEvent(event);
+    });
+  }
+
+  /**
+   * Process API response events and trigger workflows
+   */
+  private async processAPIEvent(event: APIResponseEvent): Promise<void> {
+    try {
+      console.log(chalk.blue(`🔍 Processing API event: ${event.type} from ${event.endpointName || 'webhook'}`));
+
+      // Create task from API event
+      const taskInput = await this.createTaskFromAPIEvent(event);
+      if (taskInput) {
+        const task = await this.createTaskWithTriggers(taskInput);
+        
+        // Emit task event to trigger workflows
+        const taskEvent: TaskEvent = {
+          type: 'created',
+          taskId: task.id,
+          task,
+          timestamp: new Date(),
+          metadata: { source: 'api-monitor', apiEvent: event }
+        };
+
+        await this.processTaskEvent(taskEvent);
+      }
+
+    } catch (error) {
+      console.error(chalk.red(`❌ Error processing API event: ${error}`));
+    }
+  }
+
+  /**
+   * Create task input from API event
+   */
+  private async createTaskFromAPIEvent(event: APIResponseEvent): Promise<CreateTaskInput | null> {
+    if (event.type === 'api-response') {
+      const { status, endpointName, consecutiveFailures, endpointId } = event;
+      
+      // Determine priority based on status and failures
+      let priority: 'low' | 'medium' | 'high' | 'critical' = 'medium';
+      let taskTitle = '';
+      let description = '';
+
+      if (status === 0 || (consecutiveFailures && consecutiveFailures >= 3)) {
+        priority = 'critical';
+        taskTitle = `Critical: ${endpointName} API is down`;
+        description = `API endpoint ${endpointName} has failed ${consecutiveFailures || 0} consecutive times`;
+      } else if (status >= 500) {
+        priority = 'high';
+        taskTitle = `High: ${endpointName} API server error (${status})`;
+        description = `API endpoint ${endpointName} returned server error ${status}`;
+      } else if (status >= 400) {
+        priority = 'medium';
+        taskTitle = `Medium: ${endpointName} API client error (${status})`;
+        description = `API endpoint ${endpointName} returned client error ${status}`;
+      } else if (consecutiveFailures && consecutiveFailures > 0) {
+        priority = 'high';
+        taskTitle = `High: ${endpointName} API intermittent failures`;
+        description = `API endpoint ${endpointName} has ${consecutiveFailures} consecutive failures`;
+      }
+
+      if (taskTitle) {
+        // Build rich metadata for API monitoring
+        const metadata = {
+          source: 'api-monitor',
+          endpointId: event.endpointId,
+          endpointName: event.endpointName,
+          status: event.status,
+          responseTime: event.response?.responseTime,
+          timestamp: event.timestamp,
+          consecutiveFailures: event.consecutiveFailures,
+          environment: 'production' // Configurable
+        };
+
+        // Build structured tags for filtering
+        const tags = [
+          'api-monitoring',
+          `endpoint-${endpointId || 'unknown'}`,
+          `response-${status}`,
+          `severity-${priority}`,
+          'automated'
+        ];
+
+        // Add response time category if available
+        if (event.response?.responseTime) {
+          const rt = event.response.responseTime;
+          if (rt < 100) tags.push('rt-excellent');
+          else if (rt < 500) tags.push('rt-good');
+          else if (rt < 1000) tags.push('rt-poor');
+          else tags.push('rt-critical');
+        }
+
+        return {
+          title: taskTitle,
+          description,
+          priority,
+          tags,
+          metadata
+        };
+      }
+
+    } else if (event.type === 'webhook-event') {
+      const { webhookEvent } = event;
+      
+      if (!webhookEvent) {
+        return null;
+      }
+      
+      const metadata = {
+        source: 'webhook',
+        webhookId: webhookEvent.id,
+        webhookSource: webhookEvent.source,
+        event: webhookEvent.event,
+        payload: webhookEvent.payload,
+        timestamp: webhookEvent.timestamp
+      };
+
+      const tags = [
+        'webhook',
+        webhookEvent.source.toLowerCase(),
+        webhookEvent.event.toLowerCase(),
+        'automated'
+      ];
+
+      return {
+        title: `Webhook event: ${webhookEvent.source}:${webhookEvent.event}`,
+        description: `Received webhook event from ${webhookEvent.source}`,
+        priority: 'medium',
+        tags,
+        metadata
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Start API monitoring
+   */
+  async startAPIMonitoring(): Promise<void> {
+    if (this.apiMonitor) {
+      await this.apiMonitor.start();
+      console.log(chalk.green('✅ API Response Monitor started'));
+    }
+  }
+
+  /**
+   * Stop API monitoring
+   */
+  async stopAPIMonitoring(): Promise<void> {
+    if (this.apiMonitor) {
+      await this.apiMonitor.stop();
+      console.log(chalk.yellow('🛑 API Response Monitor stopped'));
+    }
+  }
+
+  /**
+   * Add API endpoint
+   */
+  addAPIEndpoint(endpoint: APIEndpoint): void {
+    if (this.apiMonitor) {
+      this.apiMonitor.addEndpoint(endpoint);
+      console.log(chalk.green(`✅ Added API endpoint: ${endpoint.name}`));
+    }
+  }
+
+  /**
+   * Remove API endpoint
+   */
+  removeAPIEndpoint(endpointId: string): void {
+    if (this.apiMonitor) {
+      this.apiMonitor.removeEndpoint(endpointId);
+      console.log(chalk.yellow(`🗑️ Removed API endpoint: ${endpointId}`));
+    }
+  }
+
+  /**
+   * Update API endpoint
+   */
+  updateAPIEndpoint(endpointId: string, updates: Partial<APIEndpoint>): void {
+    if (this.apiMonitor) {
+      this.apiMonitor.updateEndpoint(endpointId, updates);
+      console.log(chalk.blue(`🔄 Updated API endpoint: ${endpointId}`));
+    }
+  }
+
+  /**
+   * Get API endpoints
+   */
+  getAPIEndpoints(): APIEndpoint[] {
+    return this.apiMonitor?.getEndpoints() || [];
+  }
+
+  /**
+   * Get API monitor statistics
+   */
+  getAPIMonitorStats(): any {
+    return this.apiMonitor?.getStats() || null;
+  }
+
+  /**
+   * Manually check API endpoint
+   */
+  async checkAPIEndpoint(endpointId: string): Promise<void> {
+    if (this.apiMonitor) {
+      await this.apiMonitor.checkEndpoint(endpointId);
+    }
   }
 
   /**
