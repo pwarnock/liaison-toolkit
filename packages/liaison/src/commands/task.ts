@@ -10,6 +10,7 @@ import ora from 'ora';
 import { BeadsAdapter } from '../reconciler/adapters/beads-adapter';
 import type { Task, TaskFilter } from '../reconciler/types';
 import { agenticWorkflowManager } from '../agentic-workflow-manager';
+import { checkForDuplicates, formatDuplicateMatches } from '../utils/duplicate-checker';
 
 /**
  * Format task for human-readable output
@@ -61,9 +62,12 @@ export function createTaskCommand(): Command {
     .option('--assigned-to <user>', 'Assign task to user')
     .option('--auto-trigger <workflow>', 'Automatically trigger workflow when task is created')
     .option('--priority <level>', 'Task priority (low, medium, high, critical)')
+    .option('--check-duplicates', 'Check for duplicate issues before creating (default: true)', true)
+    .option('--no-check-duplicates', 'Skip duplicate check')
+    .option('--force-create', 'Create task even if duplicates found')
     .option('--json', 'Output as JSON')
     .action(async (title: string, options) => {
-      const spinner = ora('Creating task...').start();
+      let spinner = ora('Creating task...').start();
 
       try {
         const adapter = new BeadsAdapter(true);
@@ -75,6 +79,23 @@ export function createTaskCommand(): Command {
           process.exit(1);
         }
 
+        // Check for duplicates unless explicitly bypassed
+        if (options.checkDuplicates && !options.forceCreate) {
+          spinner.text = 'Checking for duplicate issues...';
+          const dupCheck = await checkForDuplicates(title, false);
+
+          if (dupCheck.error) {
+            spinner.warn(chalk.yellow(`Duplicate check failed: ${dupCheck.error}`));
+            // Continue anyway, don't block task creation
+          } else if (dupCheck.hasDuplicates && dupCheck.matches.length > 0) {
+            spinner.stop();
+            console.log(formatDuplicateMatches(dupCheck.matches));
+            console.log(chalk.yellow('\nUse --force-create to create this task anyway\n'));
+            process.exit(0);
+          }
+        }
+
+        spinner.start();
         const task = await adapter.createTask({
           title,
           description: options.description,

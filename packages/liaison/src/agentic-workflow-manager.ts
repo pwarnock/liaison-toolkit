@@ -12,6 +12,7 @@ import { spawn } from 'child_process';
 import { appendFileSync } from 'fs';
 import { initializeFileSystemWatcher, FileSystemWatcher } from './file-system-watcher';
 import { APIResponseMonitor, APIResponseEvent, APIEndpoint, APIResponseMonitorConfig } from './api-response-monitor';
+import { checkForDuplicates } from './utils/duplicate-checker';
 
 export interface TaskEvent {
   type: 'created' | 'updated' | 'closed';
@@ -143,6 +144,19 @@ export class AgenticWorkflowManager extends EventEmitter {
       const createdTasks: Task[] = [];
 
       for (const subtaskDef of subtaskDefinitions) {
+        // Check for duplicates before creating subtask
+        const dupCheck = await checkForDuplicates(subtaskDef.title, false);
+        
+        if (dupCheck.hasDuplicates && dupCheck.matches.length > 0) {
+          console.log(
+            chalk.yellow(`⚠️  Skipping duplicate subtask: "${subtaskDef.title}"`)
+          );
+          console.log(
+            chalk.yellow(`   Found ${dupCheck.matches.length} similar issue(s)`)
+          );
+          continue; // Skip creating this subtask
+        }
+
         const task = await adapter.createTask({
           title: subtaskDef.title,
           description: subtaskDef.description,

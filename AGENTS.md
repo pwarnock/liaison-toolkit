@@ -111,6 +111,29 @@ User: "That's not what I wanted..."
 - ✅ Ask: "Should we break this into atomic subtasks?"
 - ✅ Wait for answer before creating
 
+### Duplicate Prevention
+
+**Automatic duplicate detection is now enforced in `liaison task create`**
+
+- ✅ **Default behavior**: All task creation checks for duplicates
+- ✅ **Blocks creation** if similarity > 80% match found
+- ✅ **Bypass with**: `--force-create` flag (only when intentional)
+- ✅ **Disable for batch ops**: `--no-check-duplicates` flag
+
+**Example Usage:**
+```bash
+# Standard (auto-checks, shows matches if found)
+liaison task create "Security vulnerability"
+
+# Bypass duplicate check (intentional duplicates only)
+liaison task create "Security vulnerability" --force-create
+
+# Disable check entirely (batch operations)
+liaison task create "Security vulnerability" --no-check-duplicates
+```
+
+**For agents**: Always use default behavior. Only use `--force-create` if you have explicit approval for creating a duplicate.
+
 ## Build System & Development Workflow
 
 - ✅ **Primary Build Tool**: Use Bun for all builds (`bun run build`)
