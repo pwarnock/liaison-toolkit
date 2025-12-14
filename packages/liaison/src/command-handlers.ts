@@ -1,16 +1,10 @@
 import chalk from 'chalk';
+import { CommandResult } from './types.js';
 
 /**
  * Command Handler Utilities
  * Provides common patterns and utilities for command handlers
  */
-
-export interface CommandResult {
-  success: boolean;
-  message?: string;
-  data?: any;
-  error?: string;
-}
 
 /**
  * Base Command Handler class with common functionality

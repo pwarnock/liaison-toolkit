@@ -140,9 +140,15 @@ describe('Unified CLI - Integration Tests', () => {
       middlewareManager.register(middleware1, 10);
       middlewareManager.register(middleware2, 5);
 
-      const context = { metadata: new Map() };
+      const context = {
+        command: 'test',
+        args: {},
+        options: {},
+        metadata: new Map()
+      };
       await middlewareManager.execute(context, async () => {
         order.push('handler');
+        return { success: true };
       });
 
       expect(order).toEqual(['start1', 'start2', 'handler', 'end2', 'end1']);
@@ -163,7 +169,12 @@ describe('Unified CLI - Integration Tests', () => {
 
       middlewareManager.register(errorMiddleware);
 
-      const context = { metadata: new Map() };
+      const context = {
+        command: 'test',
+        args: {},
+        options: {},
+        metadata: new Map()
+      };
       try {
         await middlewareManager.execute(context, async () => {
           throw new Error('Test error');
@@ -176,10 +187,16 @@ describe('Unified CLI - Integration Tests', () => {
     it('should apply timing middleware', async () => {
       middlewareManager.register(timingMiddleware);
 
-      const context = { metadata: new Map() };
+      const context = {
+        command: 'test',
+        args: {},
+        options: {},
+        metadata: new Map()
+      };
       await middlewareManager.execute(context, async () => {
         // Simulate work
         await new Promise(resolve => setTimeout(resolve, 10));
+        return { success: true };
       });
 
       const time = context.metadata.get('executionTime');

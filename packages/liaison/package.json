@@ -9,8 +9,8 @@
   },
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "bun build ./src/cli.ts --outdir ./dist --target node --format esm",
+    "dev": "bun build ./src/cli.ts --outdir ./dist --target node --format esm --watch",
     "test": "vitest run",
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
     "test:integration": "vitest run -- --grep 'integration'",
@@ -22,7 +22,7 @@
     "test:mutation": "stryker run",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "start": "node dist/cli.js"
+    "start": "bun ./src/cli.ts"
   },
   "dependencies": {
     "commander": "^11.1.0",

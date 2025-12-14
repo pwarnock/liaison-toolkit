@@ -442,13 +442,13 @@ class HealthChecker {
 
       if (healthResult.returnCode === 0) {
         try {
-          const outputLines = healthResult.stdout.trim().split('\n');
+          const stdout = healthResult.stdout.trim();
+          const startIndex = stdout.indexOf('{');
+          const endIndex = stdout.lastIndexOf('}');
           let jsonLine = '';
-          for (const line of outputLines) {
-            if (line.trim().startsWith('{')) {
-              jsonLine = line.trim();
-              break;
-            }
+
+          if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+            jsonLine = stdout.substring(startIndex, endIndex + 1);
           }
 
           if (jsonLine) {

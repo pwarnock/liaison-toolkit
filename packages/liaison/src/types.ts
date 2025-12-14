@@ -1,3 +1,12 @@
+export interface CommandResult {
+  success: boolean;
+  message?: string;
+  data?: any;
+  error?: string;
+  dryRun?: boolean;
+  [key: string]: any;
+}
+
 export interface CLIPlugin {
   name: string;
   version: string;

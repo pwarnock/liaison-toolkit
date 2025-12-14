@@ -52,6 +52,7 @@ default:
     @echo "  just health-coordinator - Coordinator health"
     @echo "  just health-deps   - Dependency verification"
     @echo "  just health-config - Configuration validation"
+    @echo "  just smoke-test    - Run CLI smoke tests"
     @echo ""
     @echo "Release Management:"
     @echo "  just release-patch - Create patch release"
@@ -163,6 +164,10 @@ health-verbose:
     # Run health checks with detailed output
     @echo "🏥 Running detailed health checks..."
     @cd packages/liaison && bun run dist/cli.js health --verbose --format=json | jq '.'
+
+smoke-test:
+    # Run CLI smoke tests
+    @./scripts/cli_smoke_test.sh
 
 # Aliases for backward compatibility and common usage patterns
 next:

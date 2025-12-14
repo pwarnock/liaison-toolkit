@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { PluginMiddleware } from './types.js';
+import { PluginMiddleware, CommandResult } from './types.js';
 
 // Define proper interfaces for better type safety
 export interface CommandContext {
@@ -7,12 +7,6 @@ export interface CommandContext {
   args: Record<string, unknown>;
   options: Record<string, unknown>;
   metadata: Map<string, unknown>;
-}
-
-export interface CommandResult {
-  success: boolean;
-  dryRun?: boolean;
-  [key: string]: unknown;
 }
 
 /**
