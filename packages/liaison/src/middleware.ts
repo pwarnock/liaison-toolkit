@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { PluginMiddleware, CommandResult } from './types.js';
+import { PluginMiddleware, CommandResult } from './types';
 
 // Define proper interfaces for better type safety
 export interface CommandContext {

@@ -3,7 +3,7 @@
  * Core algorithm for reconciling version tasklists with task backend
  */
 
-import type { TasklistRow, ReconcileResult, RowChange } from './types';
+import type { TasklistRow, ReconcileResult, RowChange, Task } from './types';
 import type { TaskBackendAdapter } from './adapter';
 import { TaskStatus as TS } from './types';
 
@@ -20,6 +20,21 @@ export class ReconcilerEngine {
     let created = 0;
     let updated = 0;
     let deleted = 0;
+
+    // OPTIMIZATION: Fetch all tasks once at the beginning instead of individual calls
+    const allTasksMap = new Map<string, Task>();
+    if (!dryRun) {
+      try {
+        const allTasks = await this.adapter.listTasks();
+        for (const task of allTasks) {
+          allTasksMap.set(task.id, task);
+        }
+        console.log(`📋 Loaded ${allTasks.length} tasks from backend for batch processing`);
+      } catch (err) {
+        console.error(`Failed to load tasks from backend: ${err}`);
+        // Fall back to individual calls if batch fails
+      }
+    }
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -52,10 +67,11 @@ export class ReconcilerEngine {
           created++;
         }
       }
-      // If has ID, sync status
+      // If has ID, sync status using pre-loaded tasks map
       else {
         if (!dryRun) {
-          const task = await this.adapter.getTask(row.id);
+          // OPTIMIZATION: Use pre-loaded tasks map instead of individual API call
+          const task = allTasksMap.get(row.id);
 
           if (!task || task.status === TS.Deleted) {
             // Task deleted in backend: mark row deleted

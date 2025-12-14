@@ -1,5 +1,5 @@
-import { UnifiedPluginManager } from './plugin-manager.js';
-import { liaisonPlugin } from './liaison-plugin.js';
+import { UnifiedPluginManager } from './plugin-manager';
+import { liaisonPlugin } from './liaison-plugin';
 
 // Example of how to consume the plugin system
 async function demonstratePluginConsumption() {

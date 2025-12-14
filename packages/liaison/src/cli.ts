@@ -2,11 +2,11 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { UnifiedPluginManager } from './plugin-manager.js';
-import type { CLIPlugin } from './types.js';
-import { createHealthCommand } from './commands/health.js';
-import { createReconcileCommand } from './commands/reconcile.js';
-import { createTaskCommand } from './commands/task.js';
+import { UnifiedPluginManager } from './plugin-manager';
+import type { CLIPlugin } from './types';
+import { createHealthCommand } from './commands/health';
+import { createReconcileCommand } from './commands/reconcile';
+import { createTaskCommand } from './commands/task';
 
 const program = new Command();
 const pluginManager = new UnifiedPluginManager();

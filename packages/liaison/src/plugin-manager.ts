@@ -5,7 +5,7 @@ import {
   PluginCommand,
   PluginMiddleware,
   PluginHooks
-} from './types.js';
+} from './types';
 
 export interface PluginContext {
   command: string;

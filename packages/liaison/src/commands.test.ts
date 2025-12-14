@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { liaisonPlugin } from './liaison-plugin.js';
+import { liaisonPlugin } from './liaison-plugin';
 
 // Mock child_process at module level
 vi.mock('child_process', () => {

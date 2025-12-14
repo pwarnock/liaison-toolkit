@@ -9,7 +9,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { BeadsAdapter } from '../reconciler/adapters/beads-adapter';
 import type { Task, TaskFilter } from '../reconciler/types';
-import { agenticWorkflowManager } from '../agentic-workflow-manager.js';
+import { agenticWorkflowManager } from '../agentic-workflow-manager';
 
 /**
  * Format task for human-readable output

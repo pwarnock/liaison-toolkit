@@ -1,11 +1,11 @@
 // Export all public interfaces and classes
-export * from './types.js';
-export * from './plugin-manager.js';
-export * from './middleware.js';
-export * from './command-handlers.js';
+export * from './types';
+export * from './plugin-manager';
+export * from './middleware';
+export * from './command-handlers';
 
 // Reconciler module
-export * from './reconciler/index.js';
+export * from './reconciler/index';
 
 // CLI entry point
-export * from './cli.js';
+export * from './cli';

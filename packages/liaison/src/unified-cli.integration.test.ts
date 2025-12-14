@@ -9,9 +9,9 @@ import {
   BaseCommandHandler,
   formatTable,
   displayJSON
-} from './index.js';
-import type { CLIPlugin } from './types.js';
-import { liaisonPlugin } from './liaison-plugin.js';
+} from './index';
+import type { CLIPlugin } from './types';
+import { liaisonPlugin } from './liaison-plugin';
 
 describe('Unified CLI - Integration Tests', () => {
   let pluginManager: UnifiedPluginManager;

@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { CommandResult } from './types.js';
+import { CommandResult } from './types';
 
 /**
  * Command Handler Utilities

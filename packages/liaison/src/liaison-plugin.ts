@@ -1,4 +1,4 @@
-import { CLIPlugin } from './types.js';
+import { CLIPlugin } from './types';
 
 /**
  * Liaison Integration Plugin
