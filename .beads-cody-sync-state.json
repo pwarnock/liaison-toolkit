@@ -1,28 +1,6 @@
 {
-  "last_sync": "2025-12-13T23:03:00.000Z",
-  "beads_hash": "b2c3d4e5f6a1",
-  "cody_hash": "e5f6a1b2c3d4",
-  "last_sync_commit": "beads-adapter-fix-20251213",
-  "conflicts_resolved": [
-    "ID format mismatch between Cody (owk-v5o-XX) and Beads (owk-XXX)",
-    "Completion rate discrepancy (Cody 33% vs Beads 82%)",
-    "Missing Beads data in Cody cleanup summary"
-  ],
-  "last_refresh": "2025-12-14T08:35:57.161Z",
-  "refresh_count": 20,
+  "last_sync": "2025-12-15T05:17:00.000Z",
   "last_refresh_success": true,
-  "last_refresh_message": "Sync completed successfully",
-  "reconciliation_summary": {
-    "beads_issues_analyzed": 146,
-    "cody_tasks_analyzed": 24,
-    "discrepancies_found": 3,
-    "discrepancies_resolved": 3,
-    "reconciliation_rate": "100%",
-    "major_findings": [
-      "Beads shows 82% completion (108/132 closed) vs Cody's 33% (8/24 complete)",
-      "12 active Beads issues in progress identified",
-      "ID format mismatch documented for future alignment",
-      "BeadsAdapter command timeout issue (owk-cfr) resolved with spawn-based implementation"
-    ]
-  }
+  "sync_status": "healthy",
+  "components": {}
 }

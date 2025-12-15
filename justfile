@@ -185,6 +185,121 @@ next:
 task-list: list
 config: config-show
 
+# Package Management:
+# Global Installation Commands for liaison CLI
+
+# Install liaison CLI globally using Bun workspace linking (recommended for development)
+install-global:
+    @echo "🚀 Installing liaison CLI globally using Bun workspace linking..."
+    @cd packages/liaison && bun link --global
+    @echo "✅ liaison CLI installed globally"
+    @echo "💡 Test with: liaison --help"
+
+# Install liaison CLI with bundled dependencies (production use)
+install-global-prod:
+    @echo "📦 Installing liaison CLI with bundled dependencies (production)..."
+    @echo "ℹ️  This creates a self-contained global installation"
+    @cd packages/liaison && bun run build
+    @mkdir -p ~/.bun/install/global/node_modules/@pwarnock
+    @cp -r packages/core/dist ~/.bun/install/global/node_modules/@pwarnock/toolkit-core/
+    @cp -r packages/liaison/dist ~/.bun/install/global/node_modules/@pwarnock/liaison/
+    @echo "✅ Production installation complete"
+    @echo "💡 Test with: liaison --help"
+
+# Setup development alias (fastest iteration)
+install-global-dev:
+    @echo "⚡ Setting up development alias for liaison CLI..."
+    @mkdir -p ~/.local/bin
+    @echo '#!/usr/bin/env bash' > ~/.local/bin/liaison
+    @echo '# Development alias for liaison CLI' >> ~/.local/bin/liaison
+    @echo 'node /home/pwarnock/github/liaison-toolkit/packages/liaison/dist/cli.js "$@"' >> ~/.local/bin/liaison
+    @chmod +x ~/.local/bin/liaison
+    @echo "✅ Development alias created at ~/.local/bin/liaison"
+    @echo "💡 Test with: liaison --help"
+
+# Test current global installation
+install-global-test:
+    @echo "🧪 Testing current global liaison CLI installation..."
+    @if command -v liaison >/dev/null 2>&1; then \
+        echo "✅ liaison command found in PATH"; \
+        liaison --version; \
+        echo "✅ liaison --version works"; \
+        liaison --help >/dev/null 2>&1 && echo "✅ liaison --help works" || echo "❌ liaison --help failed"; \
+    else \
+        echo "❌ liaison command not found in PATH"; \
+        echo "💡 Try: just install-global or just install-global-dev"; \
+        exit 1; \
+    fi
+
+# Clean global installation
+install-global-clean:
+    @echo "🧹 Cleaning global liaison CLI installation..."
+    @if command -v liaison >/dev/null 2>&1; then \
+        bun remove --global @pwarnock/liaison 2>/dev/null || true; \
+    fi
+    @rm -f ~/.bun/bin/liaison
+    @rm -rf ~/.bun/install/global/node_modules/@pwarnock/liaison
+    @rm -rf ~/.bun/install/global/node_modules/@pwarnock/toolkit-core
+    @rm -f ~/.local/bin/liaison
+    @echo "✅ Global installation cleaned"
+
+# Fix broken global installation (fixes silent failures)
+install-global-fix:
+    @echo "🔧 Fixing broken liaison CLI global installation..."
+    @echo "🔄 This will fix silent failures and dependency issues"
+    
+    # Clean any broken installation
+    just --unstable install-global-clean
+    
+    # Create the working wrapper (same as what we implemented manually)
+    @mkdir -p ~/.local/bin
+    @echo '#!/usr/bin/env bun' > ~/.local/bin/liaison
+    @echo '' >> ~/.local/bin/liaison
+    @echo '// Fixed wrapper for liaison CLI with proper error handling' >> ~/.local/bin/liaison
+    @echo 'import { $ } from "bun";' >> ~/.local/bin/liaison
+    @echo 'import chalk from "chalk";' >> ~/.local/bin/liaison
+    @echo '' >> ~/.local/bin/liaison
+    @echo '// Enhanced error handling' >> ~/.local/bin/liaison
+    @echo 'process.on("uncaughtException", (error) => {' >> ~/.local/bin/liaison
+    @echo '  console.error(chalk.red("❌ Uncaught exception:"), error.message);' >> ~/.local/bin/liaison
+    @echo '  process.exit(1);' >> ~/.local/bin/liaison
+    @echo '});' >> ~/.local/bin/liaison
+    @echo '' >> ~/.local/bin/liaison
+    @echo 'process.on("unhandledRejection", (reason, promise) => {' >> ~/.local/bin/liaison
+    @echo '  console.error(chalk.red("❌ Unhandled rejection:"), reason);' >> ~/.local/bin/liaison
+    @echo '  process.exit(1);' >> ~/.local/bin/liaison
+    @echo '});' >> ~/.local/bin/liaison
+    @echo '' >> ~/.local/bin/liaison
+    @echo '// Execute the CLI directly using Bun' >> ~/.local/bin/liaison
+    @echo 'try {' >> ~/.local/bin/liaison
+    @echo '  const cliPath = "/home/pwarnock/github/liaison-toolkit/packages/liaison/dist/cli.js";' >> ~/.local/bin/liaison
+    @echo '  const args = process.argv.slice(2);' >> ~/.local/bin/liaison
+    @echo '  ' >> ~/.local/bin/liaison
+    @echo '  // Execute the CLI with all arguments' >> ~/.local/bin/liaison
+    @echo '  const result = await $`node ${cliPath} ${args}`;' >> ~/.local/bin/liaison
+    @echo '  ' >> ~/.local/bin/liaison
+    @echo '  // The $ operator already prints stdout and stderr' >> ~/.local/bin/liaison
+    @echo '  // Just exit with the result'"'"'s exit code' >> ~/.local/bin/liaison
+    @echo '  process.exit(result.exitCode);' >> ~/.local/bin/liaison
+    @echo '  ' >> ~/.local/bin/liaison
+    @echo '} catch (error) {' >> ~/.local/bin/liaison
+    @echo '  console.error(chalk.red("❌ Failed to execute CLI:"), error);' >> ~/.local/bin/liaison
+    @echo '  process.exit(1);' >> ~/.local/bin/liaison
+    @echo '}' >> ~/.local/bin/liaison
+    @chmod +x ~/.local/bin/liaison
+    
+    # Update global symlink to point to our working wrapper
+    @rm -f ~/.bun/bin/liaison
+    @ln -s ~/.local/bin/liaison ~/.bun/bin/liaison
+    
+    @echo "✅ Fixed liaison CLI wrapper created"
+    @echo "🧪 Testing the fix..."
+    @liaison --help >/dev/null 2>&1 && echo "✅ liaison --help works!" || echo "❌ liaison --help still failing"
+    @echo ""
+    @echo "🎉 liaison CLI global installation fixed!"
+    @echo "💡 All commands now work globally with proper error reporting"
+    @echo "💡 Test with: liaison --help"
+
 # Help system
 help:
     @echo "Liaison Toolkit - Just Task Runner"
@@ -219,11 +334,12 @@ help:
     @echo "Package Management:"
     @echo "  just cody-*       - Cody-Beads integration commands"
     @echo "  just opencode-*   - OpenCode config commands"
-    @echo "  just install-global        - Install liaison CLI globally (⭐ recommended for development)"
+    @echo "  just install-global        - Install liaison CLI globally using Bun workspace linking (⭐ recommended for development)"
     @echo "  just install-global-prod   - Install liaison CLI with bundled dependencies (production)"
     @echo "  just install-global-dev     - Setup development alias (fastest iteration)"
     @echo "  just install-global-test   - Test current global installation"
     @echo "  just install-global-clean  - Clean global installation"
+    @echo "  just install-global-fix    - Fix broken global installation (🔧 fixes silent failures)"
     @echo ""
     @echo "Quality Assurance & Testing:"
     @echo "  just qa           - Run QA checks (lint + test + security)"

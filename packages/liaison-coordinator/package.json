@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "bun build src/index.ts --outdir ./dist --target node --format esm",
     "dev": "tsc --watch",
     "dev:hot": "bun run dev-server.ts",
     "pretest": "bun run lint && bun run format",

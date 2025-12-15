@@ -1,5 +1,15 @@
 # @pwarnock/liaison
 
+## 0.1.0
+
+### Patch Changes
+
+- Version normalization across monorepo packages
+- Fixed hardcoded plugin version (v0.5.0 → dynamic v0.1.0)
+- Made CLI version dynamic (reads from package.json)
+- Updated optional dependency: `@pwarnock/opencode_config` ^1.0.0 → ^0.1.0
+- Improved version display format: `Liaison CLI v0.1.0`
+
 ## 1.0.0
 
 ### Major Changes

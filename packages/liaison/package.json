@@ -29,10 +29,10 @@
     "inquirer": "^9.2.12",
     "ora": "^7.0.1",
     "chalk": "^5.3.0",
-    "@pwarnock/toolkit-core": "workspace:*"
+    "@pwarnock/toolkit-core": "^0.1.0"
   },
   "optionalDependencies": {
-    "@pwarnock/opencode_config": "workspace:*"
+    "@pwarnock/opencode_config": "^0.1.0"
   },
   "devDependencies": {
     "@cucumber/cucumber": "^10.0.0",
@@ -61,6 +61,11 @@
   ],
   "author": "Liaison Toolkit Contributors",
   "license": "MIT",
+  "files": [
+    "dist/**/*",
+    "README.md", 
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/pwarnock/liaison-toolkit.git",

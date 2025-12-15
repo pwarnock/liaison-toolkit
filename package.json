@@ -62,7 +62,7 @@
   "homepage": "https://github.com/pwarnock/liaison-toolkit#readme",
   "dependencies": {
     "@pwarnock/opencode_config": "./packages/opencode_config",
-    "oxlint": "^0.7.0"
+    "oxlint": "^0.7.2"
   },
   "bin": {
     "eslint": "./scripts/eslint-proxy.ts"

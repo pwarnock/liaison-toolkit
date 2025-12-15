@@ -144,6 +144,7 @@ liaison task create "Security vulnerability" --no-check-duplicates
 - ✅ **Package Manager**: Use `bun install` and `bun ci` (not npm/yarn)
 - ✅ **Direct Execution**: Use `bun packages/liaison/src/cli.ts` for development
 - ❌ **Deprecated**: Never use `tsc` for compilation, only for type checking
+- ✅ **NO TSC!**: STRICT POLICY - Only use `tsc --noEmit` for type checking, never for building
 - ✅ **Smoke Testing**: Run `./scripts/cli_smoke_test.sh` after changes
 - ✅ **Production Build**: `bun run build` only needed for publishing
 

@@ -1,4 +1,6 @@
 import { CLIPlugin } from './types';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 /**
  * Liaison Integration Plugin
@@ -6,7 +8,18 @@ import { CLIPlugin } from './types';
  */
 export const liaisonPlugin: CLIPlugin = {
   name: 'liaison',
-  version: '0.5.0',
+  version: (() => {
+    try {
+      // Read version dynamically from package.json
+      const packageJson = JSON.parse(
+        readFileSync(join(__dirname, '../../package.json'), 'utf-8')
+      );
+      return packageJson.version || '0.1.0';
+    } catch (error) {
+      // Fallback if package.json can't be read
+      return '0.1.0';
+    }
+  })(),
   description: 'Seamless integration between Liaison and task management systems',
   commands: [
     {

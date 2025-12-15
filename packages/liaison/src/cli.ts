@@ -7,6 +7,64 @@ import type { CLIPlugin } from './types';
 import { createHealthCommand } from './commands/health';
 import { createReconcileCommand } from './commands/reconcile';
 import { createTaskCommand } from './commands/task';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+// CLI version function (moved earlier for --version flag)
+const getCLIVersion = () => {
+  try {
+    // Read version dynamically from package.json
+    const packageJson = JSON.parse(
+      readFileSync(join(__dirname, '../../package.json'), 'utf-8')
+    );
+    return packageJson.version || '0.1.0';
+  } catch (error) {
+    // Fallback if package.json can't be read
+    return '0.1.0';
+  }
+};
+
+// Enhanced error handling for better debugging
+process.on('uncaughtException', (error) => {
+  console.error(chalk.red('❌ Uncaught exception:'), error.message);
+  console.error(chalk.red('Full error:'), error);
+  if (error.stack) {
+    console.error(chalk.red('Stack trace:'), error.stack);
+  }
+  console.error(chalk.yellow('💡 Try running: node packages/liaison/dist/cli.js --help'));
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error(chalk.red('❌ Unhandled rejection:'), reason);
+  console.error(chalk.red('Promise:'), promise);
+  console.error(chalk.yellow('💡 Try running: node packages/liaison/dist/cli.js --help'));
+  process.exit(1);
+});
+
+// Show version at the top for --version flag
+if (process.argv.includes('--version') || process.argv.includes('-v')) {
+  const version = getCLIVersion();
+  console.log(`Liaison CLI v${version}`);
+  process.exit(0);
+}
+
+// Validate dependencies at startup
+async function validateEnvironment() {
+  try {
+    // Test core dependency
+    const core = await import('@pwarnock/toolkit-core');
+    console.log(chalk.green('✅ Core dependency loaded successfully'));
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(chalk.red('❌ Missing or failed dependency: @pwarnock/toolkit-core'));
+    console.error(chalk.red('Error message:'), errorMessage);
+    console.error(chalk.yellow('💡 This usually means the global installation is incomplete'));
+    console.error(chalk.yellow('💡 Try rebuilding and relinking all packages'));
+    console.error(chalk.yellow('💡 Or run locally: node packages/liaison/dist/cli.js --help'));
+    process.exit(1);
+  }
+}
 
 const program = new Command();
 const pluginManager = new UnifiedPluginManager();
@@ -15,7 +73,7 @@ const pluginManager = new UnifiedPluginManager();
 program
   .name('liaison')
   .description('Liaison CLI - Workflow automation and task management')
-  .version('1.0.0');
+  .version(`v${getCLIVersion()}`);
 
 // Plugin management commands
 program
@@ -101,11 +159,13 @@ program
     try {
       console.log(chalk.blue('🔄 Starting Beads-Cody sync...'));
       
-      // This would integrate with automated sync system
+      // This integrates with the modern Bun-based sync system
       const childProcess = await import('child_process');
-      const syncProcess = childProcess.spawn('python3', [
-        'scripts/automated-sync.py',
-        ...(options.force ? ['--force'] : [])
+      const syncProcess = childProcess.spawn('bun', [
+        'run',
+        'scripts/automated-sync.ts',
+        ...(options.force ? ['--force'] : []),
+        '--verbose'
       ], {
         stdio: 'inherit',
         cwd: process.cwd()
@@ -257,6 +317,9 @@ async function loadBuiltInPlugins() {
 // Initialize and run
 async function main() {
   try {
+    // Validate environment first
+    await validateEnvironment();
+    
     await loadBuiltInPlugins();
     await pluginManager.discoverPlugins();
     
@@ -264,7 +327,8 @@ async function main() {
     await program.parseAsync(process.argv);
     
   } catch (error) {
-    console.error(chalk.red('❌ CLI initialization failed:'), error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(chalk.red('❌ CLI initialization failed:'), errorMessage);
     process.exit(1);
   }
 }

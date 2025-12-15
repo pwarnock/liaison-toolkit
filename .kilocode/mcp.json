@@ -1,1 +1,71 @@
-{"mcpServers":{}}
+{
+  "mcpServers": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    },
+
+    "githits": {
+      "type": "remote",
+      "url": "https://mcp.githits.com/",
+      "enabled": false
+    },
+    "github": {
+      "type": "remote", 
+      "url": "https://api.github.com/mcp",
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_TOKEN}"
+      },
+      "enabled": false
+    },
+    "beads": {
+      "type": "local",
+      "command": ["beads-mcp", "--project-local", "--no-daemon", "--event-driven"],
+      "environment": {
+        "BEADS_PROJECT_PATH": "{env:PWD:-.}",
+        "BEADS_DATA_DIR": "./.beads",
+        "BEADS_SYNC_MODE": "event-driven",
+        "BEADS_AUTO_EXPORT": "true",
+        "BEADS_EXPORT_INTERVAL": "5",
+        "BEADS_GIT_INTEGRATION": "true",
+        "BEADS_AUTO_COMMIT": "false"
+      },
+      "enabled": false
+    },
+    "mermaid": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-mermaid"],
+      "enabled": false
+    },
+    "filesystem": {
+      "type": "local", 
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "--allow-read", "--allow-write"],
+      "enabled": false
+    },
+    "git": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-git", "--repo-path", "."],
+      "enabled": false
+    },
+    "web": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-web", "--timeout", "30"],
+      "environment": {
+        "MCP_WEB_TIMEOUT": "30",
+        "MCP_WEB_USER_AGENT": "opencode/1.0.0"
+      },
+      "enabled": false
+    },
+    "terminal": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-terminal", "--shell", "auto"],
+      "environment": {
+        "MCP_TERM_SHELL": "auto",
+        "MCP_TERM_TIMEOUT": "30"
+      },
+      "enabled": false
+    }
+  }
+}
+}

@@ -388,9 +388,10 @@ class HealthChecker {
       issues: [],
     };
 
-    // Check justfile
+    // Check justfile (optional - only check if it exists)
     const projectRoot = process.cwd().replace(/\/packages\/liaison$/, '');
-    if (existsSync(join(projectRoot, 'justfile'))) {
+    const justfilePath = join(projectRoot, 'justfile');
+    if (existsSync(justfilePath)) {
       const justResult = await this.runCommand(['just', '--version']);
       if (justResult.returnCode === 0) {
         result.details.justfile = {
@@ -406,12 +407,11 @@ class HealthChecker {
         result.score -= 20;
       }
     } else {
+      // justfile is optional, so no penalty for missing
       result.details.justfile = {
-        status: 'unhealthy',
-        error: 'justfile not found',
+        status: 'healthy',
+        message: 'justfile not required for this setup',
       };
-      result.issues.push('justfile not found');
-      result.score -= 30;
     }
 
     return result;

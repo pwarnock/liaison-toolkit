@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "sync": {
+    "enabled": true,
+    "default_mode": "python",
+    "lock_timeout": 300,
+    "auto_commit": true,
+    "validation_enabled": true
+  },
+  "paths": {
+    "beads_file": ".beads/issues.jsonl",
+    "cody_build_dir": ".cody/project/build",
+    "state_file": ".beads-cody-sync-state.json",
+    "log_file": ".beads-cody-sync.log"
+  },
+  "notifications": {
+    "on_error": true,
+    "on_success": false,
+    "email": ""
+  }
+}
