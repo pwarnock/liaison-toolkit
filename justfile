@@ -2,6 +2,13 @@
 # Modern replacement for Make with better syntax and features
 # This is the main entry point that includes all modular justfiles
 
+# Include modular justfiles
+mod justfile_core "./justfile.core.just"
+mod justfile_packages "./justfile.packages.just"
+mod justfile_qa "./justfile.qa.just"
+mod justfile_release "./justfile.release.just"
+mod justfile_bd "./justfile.bd.just"
+
 # BD (beads) Issue Tracker Commands
 # Check for ready work
 bd-ready:
@@ -212,6 +219,11 @@ help:
     @echo "Package Management:"
     @echo "  just cody-*       - Cody-Beads integration commands"
     @echo "  just opencode-*   - OpenCode config commands"
+    @echo "  just install-global        - Install liaison CLI globally (⭐ recommended for development)"
+    @echo "  just install-global-prod   - Install liaison CLI with bundled dependencies (production)"
+    @echo "  just install-global-dev     - Setup development alias (fastest iteration)"
+    @echo "  just install-global-test   - Test current global installation"
+    @echo "  just install-global-clean  - Clean global installation"
     @echo ""
     @echo "Quality Assurance & Testing:"
     @echo "  just qa           - Run QA checks (lint + test + security)"

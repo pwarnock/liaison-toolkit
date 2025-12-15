@@ -7,6 +7,7 @@ export function createOpenCodeCommand() {
     .description('OpenCode configuration management (optional plugin)')
     .option('-d, --directory <path>', 'Target directory for configuration', process.cwd())
     .option('-a, --agents <agents>', 'Comma-separated list of agents to create', 'library-researcher,code-reviewer')
+    .option('--overwrite', 'Overwrite existing configuration')
     .option('--list-models', 'List available free models')
     .option('--list-agents', 'List available agent templates')
     .action(async (options) => {
@@ -40,7 +41,7 @@ export function createOpenCodeCommand() {
           const config = {
             projectPath: options.directory,
             agents: agentList,
-            overwrite: false
+            overwrite: options.overwrite || false
           };
 
           spinner.text = 'Creating configuration directory...';
@@ -101,8 +102,8 @@ export function createOpenCodeCommand() {
         
 
         
-        // Generate agent configuration
-        const agentConfig = opencodeConfig.generateAgentConfig(name, {
+        // Generate subagent configuration
+        const agentContent = opencodeConfig.generateSubagentConfig(name, {
           description: options.description,
           temperature: parseFloat(options.temperature)
         });
@@ -129,8 +130,8 @@ export function createOpenCodeCommand() {
 
         spinner.text = 'Writing agent file...';
         
-        // Write agent configuration
-        const agentPath = join(agentDir, `${name}.md`);
+        // Write subagent configuration
+        const agentPath = join(agentDir, `${name}.json`);
         
         if (existsSync(agentPath) && !options.overwrite) {
           spinner.warn(chalk.yellow(`Agent ${name} already exists`));
@@ -139,8 +140,8 @@ export function createOpenCodeCommand() {
           process.exit(0);
         }
         
-        writeFileSync(agentPath, agentConfig);
-
+        writeFileSync(agentPath, agentContent);
+        
         const action = existsSync(agentPath) && options.overwrite ? 'updated' : 'created';
         spinner.succeed(chalk.green(`Agent ${name} ${action} successfully!`));
         console.log(chalk.gray(`📁 Agent file: ${agentPath}`));

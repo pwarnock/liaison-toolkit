@@ -29,4 +29,32 @@ echo "Testing health (core)..."
 node "$CLI_PATH" health --component core --format json > /dev/null
 echo "✅ health passed"
 
+# Test global installation if available
+echo ""
+echo "Testing global installation..."
+if command -v liaison >/dev/null 2>&1; then
+    echo "Global liaison found: $(which liaison)"
+    
+    # Test from different directory
+    TEST_DIR=$(mktemp -d)
+    cd "$TEST_DIR"
+    
+    if timeout 10 liaison --help >/dev/null 2>&1; then
+        echo "✅ Global liaison --help works"
+    else
+        echo "❌ Global liaison --help failed"
+        cd - >/dev/null
+        rm -rf "$TEST_DIR"
+        exit 1
+    fi
+    
+    cd - >/dev/null
+    rm -rf "$TEST_DIR"
+    
+    echo "✅ Global installation test passed!"
+else
+    echo "ℹ️  Global liaison not found. Install with: just install-global"
+fi
+
+echo ""
 echo "🎉 Smoke test passed!"

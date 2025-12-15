@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { generateAgentConfig, generateConfig } from '../utils/template-engine.js';
+import { generateSubagentConfig, generateConfig } from '../utils/template-engine.js';
 import { FREE_MODELS } from '../types/models.js';
 
 export interface SetupOptions {
@@ -29,32 +29,40 @@ export async function setupOpenCodeConfig(options: SetupOptions): Promise<void> 
     console.log(`Created ${agentDir}`);
   }
   
-  // Generate main config.json
+  // Generate main configuration
+  const modelInfo = FREE_MODELS[model] || FREE_MODELS['big-pickle'];
+  const agentConfigs: Record<string, any> = {};
+  
+  agents.forEach(agentName => {
+    agentConfigs[agentName] = {
+      model: modelInfo.id,
+      description: getDefaultDescription(agentName)
+    };
+  });
+  
+  const configContent = generateConfig({
+    model: modelInfo.id,
+    agents: agentConfigs
+  });
+  
   const configPath = join(opencodeDir, 'config.json');
   if (!existsSync(configPath) || overwrite) {
-    const config = generateConfig({ 
-      model: `openrouter/z-ai/${model}`,
-      agents: agents.reduce((acc, agent) => {
-        acc[agent] = { model: `openrouter/z-ai/${model}` };
-        return acc;
-      }, {} as Record<string, { model: string }>)
-    });
-    writeFileSync(configPath, config);
+    writeFileSync(configPath, configContent);
     console.log(`Created ${configPath}`);
   } else {
     console.log(`Config already exists at ${configPath} (use --overwrite to replace)`);
   }
   
-  // Generate agent configurations
+  // Generate subagent configurations
   for (const agentName of agents) {
-    const agentConfig = generateAgentConfig(agentName, {
+    const agentContent = generateSubagentConfig(agentName, {
       description: getDefaultDescription(agentName),
       temperature: getDefaultTemperature(agentName)
     });
     
-    const agentPath = join(agentDir, `${agentName}.md`);
+    const agentPath = join(agentDir, `${agentName}.json`);
     if (!existsSync(agentPath) || overwrite) {
-      writeFileSync(agentPath, agentConfig);
+      writeFileSync(agentPath, agentContent);
       console.log(`Created ${agentPath}`);
     } else {
       console.log(`Agent config already exists at ${agentPath} (use --overwrite to replace)`);

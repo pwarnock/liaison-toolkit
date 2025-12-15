@@ -40,6 +40,9 @@ setup:
     @bun run setup:hooks || echo "Hooks setup completed"
 
     echo "✅ Development environment ready!"
+    echo ""
+    echo "🌍 To install liaison CLI globally for use anywhere, run:"
+    echo "   just install-global"
 
 # Build all packages
 build:

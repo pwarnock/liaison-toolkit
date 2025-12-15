@@ -1,0 +1,42 @@
+{
+  "$schema": "../schemas/subagent-config.json",
+  "description": "{{description}}",
+  "mode": "subagent",
+  "tools": {
+    "read": {{tools.read}},
+    "write": {{tools.write}},
+    "edit": {{tools.edit}},
+    "bash": {{tools.bash}},
+    "webfetch": {{tools.webfetch}},
+    "grep": {{tools.grep}},
+    "glob": {{tools.glob}},
+    "list": {{tools.list}},
+    "patch": {{tools.patch}},
+    "todowrite": {{tools.todowrite}},
+    "todoread": {{tools.todoread}}
+  },
+  "permissions": {
+    "read": {{permissions.read}},
+    "write": {{permissions.write}},
+    "execute": {{permissions.execute}},
+    "admin": {{permissions.admin}}
+  },
+  "environment": {
+    {{environmentVars}}
+  },
+  "behavior": {
+    "conservative": {{behavior.conservative}},
+    "confirmation_required": {{behavior.confirmation_required}},
+    "context_preservation": {{behavior.context_preservation}},
+    "rollback_enabled": {{behavior.rollback_enabled}},
+    "system_aware": {{behavior.system_aware}},
+    "version_aware": {{behavior.version_aware}}
+  },
+  "specialization": {
+    "domain": "{{specialization.domain}}",
+    "framework": "{{specialization.framework}}",
+    "capabilities": [
+      {{specialization.capabilities}}
+    ]
+  }
+}
