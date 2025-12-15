@@ -1,0 +1,9 @@
+{
+  "id": "sqlite-event-sourcing",
+  "name": "sqlite-event-sourcing",
+  "description": "SQLite event sourcing pattern for workflow events",
+  "created_at": "2025-12-14T17:30:00Z",
+  "triggers": [],
+  "actions": [],
+  "template": "custom"
+}

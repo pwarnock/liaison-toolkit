@@ -1,0 +1,9 @@
+{
+  "id": "sequential",
+  "name": "sequential",
+  "description": "Sequential workflow based on owk-12 \u2192 owk-11 pattern",
+  "created_at": "2025-12-14T17:30:00Z",
+  "triggers": [],
+  "actions": [],
+  "template": "custom"
+}

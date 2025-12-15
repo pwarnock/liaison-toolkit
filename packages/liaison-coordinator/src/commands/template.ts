@@ -270,7 +270,7 @@ async function removeTemplate(
       process.exit(1);
     }
 
-    await fs.remove(templateDir);
+    await fs.rm(templateDir, { recursive: true, force: true });
 
     console.log(chalk.green(`✅ Template ${name} removed successfully!`));
   } catch (error) {

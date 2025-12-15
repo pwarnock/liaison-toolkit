@@ -1,0 +1,9 @@
+{
+  "id": "task-driven-cli",
+  "name": "task-driven-cli",
+  "description": "Custom workflow: task-driven-cli",
+  "created_at": "2025-12-14T17:30:00Z",
+  "triggers": [],
+  "actions": [],
+  "template": "custom"
+}

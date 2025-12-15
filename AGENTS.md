@@ -17,7 +17,7 @@ When agents can see the full codebase, they tend to:
 
 1. **Ask clarifying questions first** (don't use code visibility to answer for you)
    - Example ❌: See task structure, assume what sub-tasks should be created
-   - Example ✅: "Do you want me to create subtasks in Beads, or reference existing ones?"
+   - Example ✅: "Do you want me to create subtasks using liaison, or reference existing ones?"
 
 2. **Present a plan before executing** (never code without approval)
    - Show what you propose
@@ -53,7 +53,7 @@ User: "Add task creation to liaison CLI"
 Agent: "Before I build this, clarifying questions:
 1. Should agents use `liaison task create` or `liaison create`?
 2. Should output default to human-readable or JSON?
-3. Should we use existing BeadsAdapter or create new wrapper?
+3. Should we use existing Liaison integration or create new wrapper?
 
 Here's my proposed plan once you answer those."
 
@@ -62,7 +62,7 @@ Here's my proposed plan once you answer those."
 Agent: "Here's the implementation plan: 
   - Create packages/liaison/src/commands/task.ts
   - Wire into cli.ts
-  - Use BeadsAdapter underneath
+  - Use Liaison integration underneath
   
   Ready to proceed?"
 
@@ -76,7 +76,7 @@ Agent: [implements]
 ```
 User: "Add task creation to liaison CLI"
 
-Agent: [sees BeadsAdapter exists, sees CLI structure]
+Agent: [sees Liaison integration exists, sees CLI structure]
 Agent: [creates task command immediately]
 Agent: [uses JSON output]
 Agent: [picks names arbitrarily]
@@ -90,25 +90,27 @@ User: "That's not what I wanted..."
 ### Task/Issue IDs
 
 - ❌ **Never invent IDs** (like owk-v5o-09-01)
-- ✅ Use `bun x bd create` to generate real task IDs
+- ✅ **Primary**: Use `liaison task create` for all task management
+- ✅ **Fallback**: Use `bun x bd create` if liaison unavailable  
 - ✅ Or ask which existing ID to reference
 
 ### CLI Commands
 
-- ❌ Don't assume "it should work like X"
+- ✅ **Primary**: Use `liaison` commands as primary interface
 - ✅ Ask: "Should liaison task create... be X or Y?"
 - ✅ Present options for naming/structure
+- ✅ Use `bd` commands only as backup when liaison unavailable
 
 ### File Structure
 
 - ❌ Don't infer from .gitignore or existing patterns
-- ✅ Ask: "Where should this go?"
+- ✅ Ask: "Should we use liaison task create... or bd create...?"
 - ✅ Show multiple locations if unclear
 
 ### Task Dependencies
 
 - ❌ Don't create subtasks without approval
-- ✅ Ask: "Should we break this into atomic subtasks?"
+- ✅ Ask: "Should we use `liaison task create`... or `bd create`?"
 - ✅ Wait for answer before creating
 
 ### Duplicate Prevention
